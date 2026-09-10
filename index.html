@@ -1,41 +1,594 @@
--- ===== 1) BUCKET PÚBLICO =====
-insert into storage.buckets (id, name, public)
-values ('memorial', 'memorial', true)
-on conflict (id) do update set public = true;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memorial Histórico Digital — Escola Custódio da Silva Lemos</title>
+<style>
+  :root{--tijolo:#b4552d;--tijolo-escuro:#8f3f1f;--creme:#faf6ef;--marrom:#4a3b2f;--cinza:#6b6259;--borda:#e6dccb}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--creme);color:var(--marrom);line-height:1.6}
+  img{max-width:100%;display:block}
+  .container{max-width:1000px;margin:0 auto;padding:0 20px}
 
--- ===== 2) TABELA =====
-create table if not exists public.memorial_data (
-  id uuid primary key default gen_random_uuid(),
-  tipo text,
-  titulo text,
-  descricao text,
-  data text,
-  legenda text,
-  nome text,
-  relacao text,
-  trecho text,
-  link text,
-  arquivo_url text,
-  criado_em timestamptz default now()
-);
+  /* ===== BARRA DE STATUS ===== */
+  #status{padding:8px 16px;font-size:.82rem;font-weight:600;text-align:center;background:#fff7e6;color:#8a6d1a}
+  #status.ok{background:#e8f5e9;color:#2e7d32}
+  #status.erro{background:#fdecea;color:#c62828}
 
--- ===== 3) PERMISSÕES DA TABELA (visitante anônimo lê e escreve) =====
-alter table public.memorial_data enable row level security;
-drop policy if exists "md_select" on public.memorial_data;
-create policy "md_select" on public.memorial_data for select to anon, authenticated using (true);
-drop policy if exists "md_insert" on public.memorial_data;
-create policy "md_insert" on public.memorial_data for insert to anon, authenticated with check (true);
-drop policy if exists "md_update" on public.memorial_data;
-create policy "md_update" on public.memorial_data for update to anon, authenticated using (true) with check (true);
-drop policy if exists "md_delete" on public.memorial_data;
-create policy "md_delete" on public.memorial_data for delete to anon, authenticated using (true);
+  /* ===== CAPA COM A ARTE OFICIAL ===== */
+  .capa{position:relative;min-height:430px;background-image:url('capa-site.png');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center}
+  .capa::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(74,59,47,.5),rgba(74,59,47,.12) 45%,rgba(74,59,47,.6))}
+  .capa-conteudo{position:relative;text-align:center;color:#fff;padding:50px 20px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+  .capa-conteudo h1{font-size:2.2rem;letter-spacing:.5px;margin-bottom:4px}
+  .capa-conteudo .escola{font-size:1.15rem;font-weight:600;margin-bottom:6px}
+  .capa-conteudo .sub{font-size:.88rem;opacity:.92}
+  .btn-capa{position:absolute;bottom:14px;right:14px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.5);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.82rem}
+  .btn-capa:hover{background:rgba(0,0,0,.75)}
 
--- ===== 4) PERMISSÕES DO STORAGE =====
-drop policy if exists "mem_sel" on storage.objects;
-create policy "mem_sel" on storage.objects for select to anon, authenticated using (bucket_id = 'memorial');
-drop policy if exists "mem_ins" on storage.objects;
-create policy "mem_ins" on storage.objects for insert to anon, authenticated with check (bucket_id = 'memorial');
-drop policy if exists "mem_upd" on storage.objects;
-create policy "mem_upd" on storage.objects for update to anon, authenticated using (bucket_id = 'memorial') with check (bucket_id = 'memorial');
-drop policy if exists "mem_del" on storage.objects;
-create policy "mem_del" on storage.objects for delete to anon, authenticated using (bucket_id = 'memorial');
+  /* ===== CONTADORES ===== */
+  .contadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:28px 0}
+  .contador{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:18px;text-align:center}
+  .contador strong{display:block;font-size:1.8rem;color:var(--tijolo)}
+  .contador span{font-size:.85rem;color:var(--cinza)}
+
+  /* ===== NAVEGAÇÃO ===== */
+  nav{background:#fff;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:50}
+  nav .container{display:flex;flex-wrap:wrap;align-items:center;gap:2px;justify-content:center}
+  nav .marca{font-weight:800;color:var(--tijolo-escuro);padding:12px 14px;font-size:.95rem;text-decoration:none}
+  nav a:not(.marca){display:block;padding:12px 12px;color:var(--marrom);text-decoration:none;font-size:.88rem;font-weight:600}
+  nav a:hover{color:var(--tijolo)}
+
+  /* ===== SEÇÕES ===== */
+  section{padding:44px 0;border-bottom:1px solid var(--borda)}
+  section h2{font-size:1.5rem;color:var(--tijolo-escuro);margin-bottom:6px}
+  section .subtitulo{color:var(--cinza);margin-bottom:22px}
+  .grid-secao{display:grid;grid-template-columns:1fr;gap:24px}
+  @media(min-width:820px){.grid-secao{grid-template-columns:1fr 1fr}}
+
+  /* ===== FORMULÁRIOS ===== */
+  .formulario{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:20px}
+  .formulario h3{font-size:1rem;margin-bottom:14px;color:var(--marrom)}
+  .formulario label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px;color:var(--marrom)}
+  .formulario input[type=text],.formulario input[type=date],.formulario textarea,.formulario select,.formulario input[type=file]{width:100%;padding:9px 12px;border:1px solid var(--borda);border-radius:8px;font-size:.95rem;font-family:inherit;background:#fdfbf7}
+  .formulario textarea{min-height:70px;resize:vertical}
+  .formulario button{width:100%;margin-top:14px;background:var(--tijolo);color:#fff;border:none;padding:11px;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer}
+  .formulario button:hover{background:var(--tijolo-escuro)}
+  .formulario .dica{font-size:.78rem;color:var(--cinza);margin-top:8px}
+
+  /* ===== LISTAS / CARDS ===== */
+  .lista{margin-top:24px;display:grid;gap:14px}
+  .card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
+  .card img{border-radius:8px;max-height:220px;object-fit:cover;width:100%}
+  .card audio{width:100%}
+  .card .titulo{font-weight:700}
+  .card .data{font-size:.8rem;color:var(--tijolo);font-weight:600}
+  .card .descricao{font-size:.9rem;color:var(--cinza)}
+  .card .acoes{display:flex;gap:8px;margin-top:6px}
+  .card .acoes a{color:var(--tijolo);font-size:.85rem;font-weight:600;text-decoration:none}
+  .card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:5px 12px;border-radius:6px;font-size:.8rem;cursor:pointer}
+  .grid-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:24px}
+  .foto-card{background:#fff;border:1px solid var(--borda);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .foto-card img{height:150px;width:100%;object-fit:cover}
+  .foto-card .info{padding:10px;font-size:.85rem}
+  .foto-card .info .legenda{font-weight:600}
+  .foto-card .info .data{color:var(--cinza);font-size:.78rem}
+  .foto-card .acoes{padding:0 10px 10px}
+  .foto-card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
+
+  footer{text-align:center;padding:30px 20px;color:var(--cinza);font-size:.85rem}
+  .vazio{color:var(--cinza);font-style:italic;font-size:.9rem}
+
+  @media(max-width:600px){
+    .capa{min-height:300px}
+    .capa-conteudo h1{font-size:1.5rem}
+    .capa-conteudo .escola{font-size:1rem}
+    .btn-capa{font-size:.72rem;padding:6px 10px}
+  }
+</style>
+</head>
+<body>
+
+<div id="status">Iniciando...</div>
+
+<!-- ===== CAPA ===== -->
+<div class="capa" id="capa">
+  <div class="capa-conteudo">
+    <h1>Memorial Histórico Digital</h1>
+    <p class="escola">Escola Custódio da Silva Lemos</p>
+    <p class="sub">Guanacés, distrito de Cascavel — Ceará · Da casa à escola: memória, mobilização comunitária e cidadania</p>
+  </div>
+  <button class="btn-capa" onclick="document.getElementById('capaArquivo').click()">📷 Trocar foto da capa</button>
+  <input type="file" id="capaArquivo" accept="image/*" style="display:none">
+</div>
+
+<div class="container">
+  <!-- ===== CONTADORES ===== -->
+  <div class="contadores">
+    <div class="contador"><strong id="nFotografias">0</strong><span>fotografias</span></div>
+    <div class="contador"><strong id="nDocumentos">0</strong><span>documentos</span></div>
+    <div class="contador"><strong id="nDepoimentos">0</strong><span>depoimentos</span></div>
+    <div class="contador"><strong id="nMarcos">0</strong><span>marcos na linha do tempo</span></div>
+    <div class="contador"><strong id="nLugares">0</strong><span>lugares no mapa afetivo</span></div>
+  </div>
+</div>
+
+<!-- ===== NAVEGAÇÃO ===== -->
+<nav>
+  <div class="container">
+    <a class="marca" href="#capa">Memorial CSL</a>
+    <a href="#sobre">Sobre</a>
+    <a href="#linha-do-tempo">Linha do tempo</a>
+    <a href="#fotografias">Fotografias</a>
+    <a href="#documentos">Documentos</a>
+    <a href="#depoimentos">Depoimentos</a>
+    <a href="#mapa-afetivo">Mapa afetivo</a>
+    <a href="#meus-dados">Meus dados</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ===== SOBRE ===== -->
+  <section id="sobre">
+    <h2>Sobre o memorial</h2>
+    <p>Antes de existir um prédio escolar em Guanacés, moradores da comunidade abriam as portas de suas próprias casas para ensinar crianças e jovens. Este memorial reúne o que restou — e o que ainda será encontrado — dessa história: fotografias, documentos, gravações e relatos de quem viveu a construção da Escola de Ensino Médio em Tempo Integral Custódio da Silva Lemos.</p>
+    <p style="margin-top:10px">O acervo está sendo construído por estudantes pesquisadores como parte de um projeto do Ceará Científico 2026, com apoio de professores, gestores e da própria comunidade. Tudo o que for enviado aqui fica salvo na nuvem e aparece para qualquer pessoa que visitar o site.</p>
+  </section>
+
+  <!-- ===== LINHA DO TEMPO ===== -->
+  <section id="linha-do-tempo">
+    <h2>01 · Linha do tempo</h2>
+    <p class="subtitulo">Os marcos da trajetória da escola, do ensino em casas de família até a instituição de hoje.</p>
+    <div class="grid-secao">
+      <div class="formulario">
+        <h3>+ Adicionar marco</h3>
+        <form id="formMarco">
+          <label>Data ou período</label>
+          <input type="text" id="marcoData" placeholder="Ex.: 1985">
+          <label>Título do marco</label>
+          <input type="text" id="marcoTitulo" required placeholder="Ex.: Primeiras aulas na casa da Dona Maria">
+          <label>Descrição</label>
+          <textarea id="marcoDescricao" placeholder="Conte o que aconteceu..."></textarea>
+          <label>Foto (opcional)</label>
+          <input type="file" id="marcoFoto" accept="image/*">
+          <button type="submit">Salvar marco</button>
+        </form>
+      </div>
+      <div class="lista" id="listaMarcos"></div>
+    </div>
+  </section>
+
+  <!-- ===== FOTOGRAFIAS ===== -->
+  <section id="fotografias">
+    <h2>02 · Fotografias</h2>
+    <p class="subtitulo">Imagens antigas e atuais da escola, da comunidade e das pessoas que fazem parte dessa história.</p>
+    <div class="grid-secao">
+      <div class="formulario">
+        <h3>+ Adicionar fotografia</h3>
+        <form id="formFoto">
+          <label>Arquivo de imagem (pode escolher várias)</label>
+          <input type="file" id="fotoArquivo" accept="image/*" multiple required>
+          <label>Legenda</label>
+          <input type="text" id="fotoLegenda" placeholder="Ex.: Turma de 1998 na frente da escola">
+          <label>Data ou período (opcional)</label>
+          <input type="text" id="fotoData" placeholder="Ex.: 1998">
+          <p class="dica">Ao enviar várias fotos de uma vez, a legenda e a data serão aplicadas a todas — você pode excluir depois pelo botão remover.</p>
+          <button type="submit">Salvar fotografia(s)</button>
+        </form>
+      </div>
+      <div class="grid-fotos" id="gridFotos"></div>
+    </div>
+  </section>
+
+  <!-- ===== DOCUMENTOS ===== -->
+  <section id="documentos">
+    <h2>03 · Documentos</h2>
+    <p class="subtitulo">Atas, livros de matrícula, projetos pedagógicos, jornais e registros oficiais relacionados à escola.</p>
+    <div class="grid-secao">
+      <div class="formulario">
+        <h3>+ Adicionar documento</h3>
+        <form id="formDocumento">
+          <label>Arquivo (PDF ou imagem)</label>
+          <input type="file" id="docArquivo" accept=".pdf,image/*" required>
+          <label>Título</label>
+          <input type="text" id="docTitulo" required placeholder="Ex.: Ata da primeira reunião">
+          <label>Data (opcional)</label>
+          <input type="text" id="docData" placeholder="Ex.: 1990">
+          <label>Descrição (opcional)</label>
+          <textarea id="docDescricao" placeholder="Do que se trata esse documento?"></textarea>
+          <p class="dica">Arquivos bem grandes podem demorar alguns segundos para carregar.</p>
+          <button type="submit">Salvar documento</button>
+        </form>
+      </div>
+      <div class="lista" id="listaDocumentos"></div>
+    </div>
+  </section>
+
+  <!-- ===== DEPOIMENTOS ===== -->
+  <section id="depoimentos">
+    <h2>04 · Depoimentos</h2>
+    <p class="subtitulo">Relatos de ex-alunos, ex-professores, gestores e moradores pioneiros — em texto, áudio ou vídeo.</p>
+    <div class="grid-secao">
+      <div class="formulario">
+        <h3>+ Adicionar depoimento</h3>
+        <form id="formDepoimento">
+          <label>Nome do entrevistado</label>
+          <input type="text" id="depNome" required placeholder="Ex.: Maria José da Silva">
+          <label>Relação com a escola</label>
+          <input type="text" id="depRelacao" placeholder="Ex.: Ex-aluna (1978)">
+          <label>Trecho do relato / resumo</label>
+          <textarea id="depTrecho" placeholder="Escreva aqui o depoimento..."></textarea>
+          <label>Mídia</label>
+          <select id="depTipoMidia">
+            <option value="sem">Sem mídia</option>
+            <option value="link">Link (YouTube/Drive)</option>
+            <option value="audio">Arquivo de áudio</option>
+          </select>
+          <div id="depLinkDiv" style="display:none">
+            <label>Link do vídeo ou áudio</label>
+            <input type="text" id="depLink" placeholder="https://...">
+          </div>
+          <div id="depAudioDiv" style="display:none">
+            <label>Arquivo de áudio (mp3, m4a, wav...)</label>
+            <input type="file" id="depAudio" accept="audio/*">
+          </div>
+          <button type="submit">Salvar depoimento</button>
+        </form>
+      </div>
+      <div class="lista" id="listaDepoimentos"></div>
+    </div>
+  </section>
+
+  <!-- ===== MAPA AFETIVO ===== -->
+  <section id="mapa-afetivo">
+    <h2>05 · Mapa afetivo</h2>
+    <p class="subtitulo">Lugares de Guanacés associados à memória escolar — as casas onde havia aula, pontos de referência, a escola em diferentes momentos.</p>
+    <div class="grid-secao">
+      <div class="formulario">
+        <h3>+ Adicionar lugar</h3>
+        <form id="formLugar">
+          <label>Nome do lugar</label>
+          <input type="text" id="lugarNome" required placeholder="Ex.: Casa da Dona Maria">
+          <label>Memória associada</label>
+          <textarea id="lugarMemoria" placeholder="O que esse lugar representa?"></textarea>
+          <button type="submit">Salvar lugar</button>
+        </form>
+      </div>
+      <div class="lista" id="listaLugares"></div>
+    </div>
+  </section>
+
+  <!-- ===== MEUS DADOS ===== -->
+  <section id="meus-dados">
+    <h2>Meus dados</h2>
+    <p class="subtitulo">Tudo o que você adiciona aqui fica salvo na nuvem (Supabase) e aparece para qualquer pessoa que visitar o site. Use o botão abaixo para guardar uma cópia de segurança do acervo no seu computador.</p>
+    <div class="formulario" style="max-width:420px">
+      <button type="button" onclick="exportarBackup()">⬇️ Exportar cópia de segurança (.json)</button>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Memorial Histórico Digital — Escola Custódio da Silva Lemos<br>
+  Guanacés, Cascavel/CE · Projeto Ceará Científico 2026
+</footer>
+
+<script>
+// ============================================================
+// CONFIGURAÇÃO — URL e chave do SEU projeto Supabase
+// ============================================================
+var SUPABASE_URL = 'https://rmxgenobstqkveijjdhv.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJteGdlbm9ic3Rxa3ZlaWpqZGh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMzc5NzksImV4cCI6MjEwNDYxMzk3OX0.wYtFbxXs8meST4YniMvJC-vrHISXr87tqHJWiY9BBQc';
+var BUCKET = 'memorial'; // nome exato do bucket criado pelo SQL
+
+var itens = []; // registros carregados da nuvem
+
+// ============================================================
+// STATUS NA TELA
+// ============================================================
+function setStatus(texto, ok) {
+  var el = document.getElementById('status');
+  el.textContent = texto;
+  el.className = ok ? 'ok' : 'erro';
+}
+function mostrarErro(msg) {
+  console.error(msg);
+  setStatus('❌ ' + msg, false);
+  alert('Erro: ' + msg);
+}
+
+// ============================================================
+// ACESSO DIRETO AO SUPABASE (sem biblioteca externa)
+// ============================================================
+function cabecalhos(extra) {
+  var h = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY
+  };
+  if (extra) { for (var k in extra) h[k] = extra[k]; }
+  return h;
+}
+
+async function carregarDados() {
+  var resp = await fetch(
+    SUPABASE_URL + '/rest/v1/memorial_data?select=*&order=criado_em.desc',
+    { headers: cabecalhos({ 'Content-Type': 'application/json' }) }
+  );
+  if (!resp.ok) { throw new Error('Erro ao carregar dados (' + resp.status + '): ' + (await resp.text())); }
+  itens = await resp.json();
+  renderizarTudo();
+}
+
+async function inserirRegistro(registro) {
+  var resp = await fetch(SUPABASE_URL + '/rest/v1/memorial_data', {
+    method: 'POST',
+    headers: cabecalhos({ 'Content-Type': 'application/json', 'Prefer': 'return=minimal' }),
+    body: JSON.stringify(registro)
+  });
+  if (!resp.ok) { throw new Error('Erro ao salvar (' + resp.status + '): ' + (await resp.text())); }
+}
+
+async function enviarArquivo(arquivo, pasta) {
+  var nomeLimpo = arquivo.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  var caminho = pasta + '/' + Date.now() + '_' + nomeLimpo;
+  var resp = await fetch(
+    SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + caminho,
+    {
+      method: 'POST',
+      headers: cabecalhos({ 'Content-Type': arquivo.type || 'application/octet-stream' }),
+      body: arquivo
+    }
+  );
+  if (!resp.ok) { throw new Error('Falha ao enviar arquivo (' + resp.status + '): ' + (await resp.text())); }
+  return SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + caminho;
+}
+
+async function adicionarItem(tipo, campos, arquivo, pasta) {
+  var url = null;
+  if (arquivo) { url = await enviarArquivo(arquivo, pasta); }
+  var registro = { tipo: tipo };
+  for (var k in campos) registro[k] = campos[k];
+  if (url) registro.arquivo_url = url;
+  await inserirRegistro(registro);
+  await carregarDados();
+}
+
+async function excluirItem(id, urlArquivo) {
+  if (!confirm('Tem certeza que deseja excluir este item?')) return;
+  try {
+    if (urlArquivo) {
+      var partes = urlArquivo.split('/storage/v1/object/public/' + BUCKET + '/');
+      if (partes.length > 1) {
+        await fetch(SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + partes[1], {
+          method: 'DELETE',
+          headers: cabecalhos({})
+        });
+      }
+    }
+    var resp = await fetch(SUPABASE_URL + '/rest/v1/memorial_data?id=eq.' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: cabecalhos({ 'Prefer': 'return=minimal' })
+    });
+    if (!resp.ok) { throw new Error('Erro ao excluir (' + resp.status + '): ' + (await resp.text())); }
+    await carregarDados();
+  } catch (e) { mostrarErro(e.message); }
+}
+
+// ============================================================
+// CAPA
+// ============================================================
+async function trocarCapa(arquivo) {
+  try {
+    var url = await enviarArquivo(arquivo, 'capa');
+    await inserirRegistro({ tipo: 'capa', titulo: 'Foto da capa', arquivo_url: url });
+    await carregarDados();
+  } catch (e) { mostrarErro(e.message); }
+}
+
+// ============================================================
+// RENDERIZAR TUDO
+// ============================================================
+function renderizarTudo() {
+  var fotos = itens.filter(function (i) { return i.tipo === 'fotografia'; });
+  var docs = itens.filter(function (i) { return i.tipo === 'documento'; });
+  var deps = itens.filter(function (i) { return i.tipo === 'depoimento'; });
+  var marcos = itens.filter(function (i) { return i.tipo === 'marco'; });
+  var lugares = itens.filter(function (i) { return i.tipo === 'lugar'; });
+  var capas = itens.filter(function (i) { return i.tipo === 'capa'; });
+
+  document.getElementById('nFotografias').textContent = fotos.length;
+  document.getElementById('nDocumentos').textContent = docs.length;
+  document.getElementById('nDepoimentos').textContent = deps.length;
+  document.getElementById('nMarcos').textContent = marcos.length;
+  document.getElementById('nLugares').textContent = lugares.length;
+
+  if (capas.length > 0) {
+    document.getElementById('capa').style.backgroundImage = "url('" + capas[0].arquivo_url + "')";
+  }
+
+  renderMarcos(marcos);
+  renderFotos(fotos);
+  renderDocumentos(docs);
+  renderDepoimentos(deps);
+  renderLugares(lugares);
+}
+
+function esc(t) { return String(t || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function renderMarcos(marcos) {
+  var el = document.getElementById('listaMarcos');
+  if (!marcos.length) { el.innerHTML = '<p class="vazio">Nenhum marco adicionado ainda.</p>'; return; }
+  el.innerHTML = marcos.map(function (m) {
+    return '<div class="card">' +
+      (m.arquivo_url ? '<img src="' + m.arquivo_url + '" alt="' + esc(m.titulo) + '">' : '') +
+      '<div class="data">' + esc(m.data || '') + '</div>' +
+      '<div class="titulo">' + esc(m.titulo) + '</div>' +
+      '<div class="descricao">' + esc(m.descricao || '') + '</div>' +
+      '<div class="acoes"><button onclick="excluirItem(\'' + m.id + '\',\'' + (m.arquivo_url || '') + '\')">🗑️ Excluir</button></div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderFotos(fotos) {
+  var el = document.getElementById('gridFotos');
+  if (!fotos.length) { el.innerHTML = '<p class="vazio">Nenhuma fotografia adicionada ainda.</p>'; return; }
+  el.innerHTML = fotos.map(function (f) {
+    return '<div class="foto-card">' +
+      '<img src="' + f.arquivo_url + '" alt="' + esc(f.legenda || 'Fotografia') + '">' +
+      '<div class="info"><div class="legenda">' + esc(f.legenda || 'Sem legenda') + '</div>' +
+      '<div class="data">' + esc(f.data || '') + '</div></div>' +
+      '<div class="acoes"><button onclick="excluirItem(\'' + f.id + '\',\'' + f.arquivo_url + '\')">🗑️ Excluir</button></div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderDocumentos(docs) {
+  var el = document.getElementById('listaDocumentos');
+  if (!docs.length) { el.innerHTML = '<p class="vazio">Nenhum documento adicionado ainda.</p>'; return; }
+  el.innerHTML = docs.map(function (d) {
+    return '<div class="card">' +
+      '<div class="data">' + esc(d.data || '') + '</div>' +
+      '<div class="titulo">📄 ' + esc(d.titulo) + '</div>' +
+      '<div class="descricao">' + esc(d.descricao || '') + '</div>' +
+      '<div class="acoes"><a href="' + d.arquivo_url + '" target="_blank">Abrir arquivo</a>' +
+      '<button onclick="excluirItem(\'' + d.id + '\',\'' + (d.arquivo_url || '') + '\')">🗑️ Excluir</button></div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderDepoimentos(deps) {
+  var el = document.getElementById('listaDepoimentos');
+  if (!deps.length) { el.innerHTML = '<p class="vazio">Nenhum depoimento adicionado ainda.</p>'; return; }
+  el.innerHTML = deps.map(function (d) {
+    var midia = '';
+    if (d.link) { midia = '<a href="' + d.link + '" target="_blank" style="color:var(--tijolo);font-weight:600">▶️ Ouvir/ver mídia</a>'; }
+    if (d.arquivo_url) { midia = '<audio controls src="' + d.arquivo_url + '"></audio>'; }
+    return '<div class="card">' +
+      '<div class="titulo">' + esc(d.nome) + '</div>' +
+      '<div class="data">' + esc(d.relacao || '') + '</div>' +
+      '<div class="descricao">' + esc(d.trecho || '') + '</div>' +
+      midia +
+      '<div class="acoes"><button onclick="excluirItem(\'' + d.id + '\',\'' + (d.arquivo_url || '') + '\')">🗑️ Excluir</button></div>' +
+      '</div>';
+  }).join('');
+}
+
+function renderLugares(lugares) {
+  var el = document.getElementById('listaLugares');
+  if (!lugares.length) { el.innerHTML = '<p class="vazio">Nenhum lugar adicionado ainda.</p>'; return; }
+  el.innerHTML = lugares.map(function (l) {
+    return '<div class="card">' +
+      '<div class="titulo">📍 ' + esc(l.titulo) + '</div>' +
+      '<div class="descricao">' + esc(l.descricao || '') + '</div>' +
+      '<div class="acoes"><button onclick="excluirItem(\'' + l.id + '\',\'\')">🗑️ Excluir</button></div>' +
+      '</div>';
+  }).join('');
+}
+
+// ============================================================
+// BACKUP
+// ============================================================
+function exportarBackup() {
+  var blob = new Blob([JSON.stringify(itens, null, 2)], { type: 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'memorial-backup.json';
+  a.click();
+}
+
+// ============================================================
+// EVENTOS DOS FORMULÁRIOS
+// ============================================================
+document.getElementById('formMarco').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  try {
+    await adicionarItem('marco', {
+      data: document.getElementById('marcoData').value,
+      titulo: document.getElementById('marcoTitulo').value,
+      descricao: document.getElementById('marcoDescricao').value
+    }, document.getElementById('marcoFoto').files[0], 'marcos');
+    e.target.reset();
+  } catch (err) { mostrarErro(err.message); }
+});
+
+document.getElementById('formFoto').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var arquivos = document.getElementById('fotoArquivo').files;
+  var legenda = document.getElementById('fotoLegenda').value;
+  var data = document.getElementById('fotoData').value;
+  try {
+    for (var i = 0; i < arquivos.length; i++) {
+      await adicionarItem('fotografia', { legenda: legenda, data: data }, arquivos[i], 'fotografias');
+    }
+    e.target.reset();
+  } catch (err) { mostrarErro(err.message); }
+});
+
+document.getElementById('formDocumento').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  try {
+    await adicionarItem('documento', {
+      titulo: document.getElementById('docTitulo').value,
+      data: document.getElementById('docData').value,
+      descricao: document.getElementById('docDescricao').value
+    }, document.getElementById('docArquivo').files[0], 'documentos');
+    e.target.reset();
+  } catch (err) { mostrarErro(err.message); }
+});
+
+document.getElementById('formDepoimento').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  var tipoMidia = document.getElementById('depTipoMidia').value;
+  var campos = {
+    nome: document.getElementById('depNome').value,
+    relacao: document.getElementById('depRelacao').value,
+    trecho: document.getElementById('depTrecho').value,
+    link: tipoMidia === 'link' ? document.getElementById('depLink').value : null
+  };
+  var arquivo = tipoMidia === 'audio' ? document.getElementById('depAudio').files[0] : null;
+  try {
+    await adicionarItem('depoimento', campos, arquivo, 'depoimentos');
+    e.target.reset();
+  } catch (err) { mostrarErro(err.message); }
+});
+
+document.getElementById('formLugar').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  try {
+    await adicionarItem('lugar', {
+      titulo: document.getElementById('lugarNome').value,
+      descricao: document.getElementById('lugarMemoria').value
+    }, null, null);
+    e.target.reset();
+  } catch (err) { mostrarErro(err.message); }
+});
+
+document.getElementById('depTipoMidia').addEventListener('change', function (e) {
+  var v = e.target.value;
+  document.getElementById('depLinkDiv').style.display = v === 'link' ? 'block' : 'none';
+  document.getElementById('depAudioDiv').style.display = v === 'audio' ? 'block' : 'none';
+});
+
+document.getElementById('capaArquivo').addEventListener('change', function (e) {
+  if (e.target.files[0]) { trocarCapa(e.target.files[0]); }
+});
+
+// ============================================================
+// INICIAR
+// ============================================================
+async function iniciar() {
+  try {
+    setStatus('Conectando ao Supabase...');
+    await carregarDados();
+    setStatus('✅ Conectado ao Supabase — o acervo está na nuvem.', true);
+  } catch (erro) {
+    console.error(erro);
+    setStatus('❌ ' + erro.message, false);
+  }
+}
+iniciar();
+</script>
+</body>
+</html>
