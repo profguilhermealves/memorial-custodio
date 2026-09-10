@@ -15,7 +15,7 @@
   #status.ok{background:#e8f5e9;color:#2e7d32}
   #status.erro{background:#fdecea;color:#c62828}
 
-  .capa{position:relative;min-height:860px;background-image:url('capa-site.png');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;cursor:zoom-in}
+  .capa{position:relative;min-height:430px;background-image:url('capa-site.png');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;cursor:zoom-in}
   .capa::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(74,59,47,.5),rgba(74,59,47,.12) 45%,rgba(74,59,47,.6))}
   .capa-conteudo{position:relative;text-align:center;color:#fff;padding:50px 20px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
   .capa-conteudo h1{font-size:2.2rem;letter-spacing:.5px;margin-bottom:4px}
@@ -49,7 +49,8 @@
   .formulario input[type=text],.formulario input[type=date],.formulario textarea,.formulario select,.formulario input[type=file]{width:100%;padding:9px 12px;border:1px solid var(--borda);border-radius:8px;font-size:.95rem;font-family:inherit;background:#fdfbf7}
   .formulario textarea{min-height:70px;resize:vertical}
   .formulario button{width:100%;margin-top:14px;background:var(--tijolo);color:#fff;border:none;padding:11px;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer}
-  .formulario button:hover{background:var(--tijolo-escuro)}
+  .formulario button:hover:not(:disabled){background:var(--tijolo-escuro)}
+  .formulario button:disabled{opacity:.65;cursor:not-allowed}
   .formulario .dica{font-size:.78rem;color:var(--cinza);margin-top:8px}
 
   .lista{margin-top:24px;display:grid;gap:14px}
@@ -85,6 +86,19 @@
   .login-box button{width:100%;margin-top:12px;background:var(--tijolo);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer}
   .login-box button.cancelar{background:#eee;color:var(--marrom);margin-top:6px}
   #loginMsg{font-size:.83rem;color:#c62828;margin-top:8px;min-height:1em}
+
+  /* ===== OVERLAY DE PROGRESSO DO UPLOAD ===== */
+  #uploadOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1000}
+  .upload-box{background:#fff;border-radius:14px;padding:26px 30px;width:min(92vw,430px);text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+  .upload-box .upload-titulo{font-weight:700;color:var(--marrom);margin-bottom:14px;font-size:.95rem}
+  .upload-barra{height:13px;background:#f0e9dd;border-radius:99px;overflow:hidden;margin-bottom:10px}
+  .upload-barra > div{height:100%;width:0;background:linear-gradient(90deg,var(--tijolo),#d98a5f);transition:width .15s ease;border-radius:99px}
+  .upload-pct{font-size:1.15rem;font-weight:800;color:var(--tijolo-escuro)}
+  .upload-detalhe{font-size:.82rem;color:var(--cinza);margin-top:8px;min-height:1em;word-break:break-word}
+
+  /* ===== TOAST ===== */
+  #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:11px 20px;border-radius:10px;font-size:.9rem;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:1100;max-width:92vw;text-align:center}
+  #toast.erro{background:#c62828}
 
   footer{text-align:center;padding:30px 20px;color:var(--cinza);font-size:.85rem}
   .vazio{color:var(--cinza);font-style:italic;font-size:.9rem}
@@ -134,6 +148,19 @@
     <button class="cancelar" onclick="fecharLogin()">Cancelar</button>
   </div>
 </div>
+
+<!-- ===== OVERLAY DE PROGRESSO DO UPLOAD ===== -->
+<div id="uploadOverlay">
+  <div class="upload-box">
+    <div class="upload-titulo" id="uploadTitulo">Enviando arquivo...</div>
+    <div class="upload-barra"><div id="uploadBarra"></div></div>
+    <div class="upload-pct" id="uploadPct">0%</div>
+    <div class="upload-detalhe" id="uploadDetalhe"></div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
 
 <div class="container">
   <div class="contadores">
@@ -185,6 +212,7 @@
           <textarea id="marcoDescricao" placeholder="Conte o que aconteceu..."></textarea>
           <label>Foto (opcional)</label>
           <input type="file" id="marcoFoto" accept="image/*">
+          <p class="dica">Tamanho máximo por arquivo: 50 MB.</p>
           <button type="submit">Salvar marco</button>
         </form>
       </div>
@@ -205,7 +233,7 @@
           <input type="text" id="fotoLegenda" placeholder="Ex.: Turma de 1998 na frente da escola">
           <label>Data ou período (opcional)</label>
           <input type="text" id="fotoData" placeholder="Ex.: 1998">
-          <p class="dica">Ao enviar várias fotos de uma vez, a legenda e a data serão aplicadas a todas.</p>
+          <p class="dica">Ao enviar várias fotos de uma vez, a legenda e a data serão aplicadas a todas. Tamanho máximo por arquivo: 50 MB.</p>
           <button type="submit">Salvar fotografia(s)</button>
         </form>
       </div>
@@ -228,7 +256,7 @@
           <input type="text" id="docData" placeholder="Ex.: 1990">
           <label>Descrição (opcional)</label>
           <textarea id="docDescricao" placeholder="Do que se trata esse documento?"></textarea>
-          <p class="dica">Arquivos bem grandes podem demorar alguns segundos para carregar.</p>
+          <p class="dica">Arquivos bem grandes podem demorar alguns segundos para carregar. Tamanho máximo: 50 MB.</p>
           <button type="submit">Salvar documento</button>
         </form>
       </div>
@@ -262,6 +290,7 @@
           <div id="depAudioDiv" style="display:none">
             <label>Arquivo de áudio (mp3, m4a, wav...)</label>
             <input type="file" id="depAudio" accept="audio/*">
+            <p class="dica">Prefira MP3. Tamanho máximo por arquivo: 50 MB.</p>
           </div>
           <button type="submit">Salvar depoimento</button>
         </form>
@@ -311,21 +340,90 @@ var SUPABASE_URL = 'https://rmxgenobstqkveijjdhv.supabase.co';
 var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJteGdlbm9ic3Rxa3ZlaWpqZGh2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMzc5NzksImV4cCI6MjEwNDYxMzk3OX0.wYtFbxXs8meST4YniMvJC-vrHISXr87tqHJWiY9BBQc';
 var BUCKET = 'memorial';
 
+// Limite por arquivo (plano gratuito do Supabase: 50 MB)
+var MAX_ARQUIVO_MB = 50;
+var MAX_ARQUIVO_BYTES = MAX_ARQUIVO_MB * 1024 * 1024;
+
 var itens = [];
 var tokenAcesso = localStorage.getItem('memorial_token') || null;
 var emailUsuario = localStorage.getItem('memorial_email') || null;
 var podeEditar = false;
 var capaUrlAtual = null;
 
+// ============================================================
+// STATUS, TOAST E ERROS
+// ============================================================
 function setStatus(texto, ok) {
   var el = document.getElementById('status');
   el.textContent = texto;
   el.className = ok ? 'ok' : 'erro';
 }
+
+var toastTimer = null;
+function mostrarToast(msg, erro) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = erro ? 'erro' : '';
+  t.style.opacity = '1';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { t.style.opacity = '0'; }, 4000);
+}
+
 function mostrarErro(msg) {
   console.error(msg);
   setStatus('❌ ' + msg, false);
-  alert('Erro: ' + msg);
+  mostrarToast(msg, true);
+}
+
+// ============================================================
+// VALIDAÇÃO DE TAMANHO DOS ARQUIVOS
+// ============================================================
+function tamanhoLegivel(bytes) {
+  if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  if (bytes >= 1024) return (bytes / 1024).toFixed(0) + ' KB';
+  return bytes + ' B';
+}
+
+function validarTamanhoArquivo(arquivo) {
+  if (!arquivo) return null;
+  if (arquivo.size > MAX_ARQUIVO_BYTES) {
+    return 'O arquivo "' + arquivo.name + '" tem ' + tamanhoLegivel(arquivo.size) +
+           ' e passou do limite de ' + MAX_ARQUIVO_MB + ' MB por arquivo. ' +
+           'Escolha um arquivo menor — para áudio, prefira MP3; para imagens, reduza a resolução.';
+  }
+  return null;
+}
+
+function validarListaArquivos(arquivos) {
+  for (var i = 0; i < arquivos.length; i++) {
+    var msg = validarTamanhoArquivo(arquivos[i]);
+    if (msg) return msg;
+  }
+  return null;
+}
+
+// ============================================================
+// OVERLAY DE PROGRESSO DO UPLOAD
+// ============================================================
+function mostrarProgresso(titulo, detalhe) {
+  document.getElementById('uploadOverlay').style.display = 'flex';
+  document.getElementById('uploadTitulo').textContent = titulo || 'Enviando arquivo...';
+  document.getElementById('uploadDetalhe').textContent = detalhe || '';
+  atualizarBarra(0);
+}
+function atualizarBarra(pct, detalhe) {
+  document.getElementById('uploadBarra').style.width = Math.min(100, Math.max(0, pct)) + '%';
+  document.getElementById('uploadPct').textContent = Math.round(pct) + '%';
+  if (detalhe !== undefined) document.getElementById('uploadDetalhe').textContent = detalhe;
+}
+function ocultarProgresso() {
+  document.getElementById('uploadOverlay').style.display = 'none';
+}
+
+function setBotoesDesabilitados(desabilitar) {
+  var botoes = document.querySelectorAll('button[type="submit"]');
+  for (var i = 0; i < botoes.length; i++) botoes[i].disabled = desabilitar;
 }
 
 // ============================================================
@@ -378,6 +476,7 @@ async function fazerLogin() {
     await verificarEditor();
     fecharLogin();
     aplicarPermissoes();
+    mostrarToast('✅ Entrou como editor.', false);
   } catch (e) {
     msg.textContent = e.message;
   }
@@ -399,7 +498,6 @@ async function sair() {
   await carregarDados();
 }
 
-// Verifica se o e-mail logado está na lista de editores autorizados
 async function verificarEditor() {
   podeEditar = false;
   if (!tokenAcesso || !emailUsuario) return;
@@ -414,7 +512,6 @@ async function verificarEditor() {
   } catch (e) { podeEditar = false; }
 }
 
-// Restaura sessão salva ao reabrir a página
 async function restaurarSessao() {
   if (!tokenAcesso) return;
   try {
@@ -435,7 +532,6 @@ async function restaurarSessao() {
   } catch (e) { /* sessão expirada, segue como visitante */ }
 }
 
-// Mostra/esconde formulários e botões de edição conforme a permissão
 function aplicarPermissoes() {
   var divs = document.getElementsByClassName('editor-only');
   for (var i = 0; i < divs.length; i++) {
@@ -492,30 +588,54 @@ async function inserirRegistro(registro) {
   if (!resp.ok) { throw new Error('Erro ao salvar (' + resp.status + '): ' + (await resp.text())); }
 }
 
-async function enviarArquivo(arquivo, pasta) {
-  var nomeLimpo = arquivo.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-  var caminho = pasta + '/' + Date.now() + '_' + nomeLimpo;
-  var resp = await fetch(
-    SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + caminho,
-    {
-      method: 'POST',
-      headers: cabecalhos({ 'Content-Type': arquivo.type || 'application/octet-stream' }),
-      body: arquivo
-    }
-  );
-  if (!resp.ok) { throw new Error('Falha ao enviar arquivo (' + resp.status + '): ' + (await resp.text())); }
-  return SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + caminho;
+// Upload com barra de progresso real (XMLHttpRequest acompanha o envio)
+function enviarArquivoComProgresso(arquivo, pasta, aoProgresso) {
+  return new Promise(function (resolver, rejeitar) {
+    var nomeLimpo = arquivo.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    var caminho = pasta + '/' + Date.now() + '_' + nomeLimpo;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', SUPABASE_URL + '/storage/v1/object/' + BUCKET + '/' + caminho);
+    xhr.setRequestHeader('apikey', SUPABASE_KEY);
+    xhr.setRequestHeader('Authorization', 'Bearer ' + (tokenAcesso || SUPABASE_KEY));
+    xhr.setRequestHeader('Content-Type', arquivo.type || 'application/octet-stream');
+    xhr.upload.onprogress = function (e) {
+      if (e.lengthComputable && aoProgresso) aoProgresso(e.loaded, e.total);
+    };
+    xhr.onload = function () {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolver(SUPABASE_URL + '/storage/v1/object/public/' + BUCKET + '/' + caminho);
+      } else {
+        var msg = '';
+        try { msg = JSON.parse(xhr.responseText).message || ''; } catch (err2) { msg = xhr.responseText; }
+        rejeitar(new Error('Falha ao enviar arquivo (' + xhr.status + '): ' + msg));
+      }
+    };
+    xhr.onerror = function () {
+      rejeitar(new Error('Falha de conexão ao enviar o arquivo. Verifique sua internet e tente novamente.'));
+    };
+    xhr.send(arquivo);
+  });
 }
 
-async function adicionarItem(tipo, campos, arquivo, pasta) {
-  if (!podeEditar) { mostrarErro('Você não tem permissão para adicionar conteúdo.'); return; }
+function enviarComProgresso(arquivo, pasta) {
+  return enviarArquivoComProgresso(arquivo, pasta, function (carregado, totalBytes) {
+    var pct = totalBytes ? (carregado * 100 / totalBytes) : 0;
+    atualizarBarra(pct, arquivo.name + ' — ' + tamanhoLegivel(carregado) + (totalBytes ? ' de ' + tamanhoLegivel(totalBytes) : ''));
+  });
+}
+
+async function adicionarItem(tipo, campos, arquivo, pasta, contexto) {
+  if (!podeEditar) { throw new Error('Você não tem permissão para adicionar conteúdo.'); }
   var url = null;
-  if (arquivo) { url = await enviarArquivo(arquivo, pasta); }
+  if (arquivo) {
+    mostrarProgresso(contexto ? 'Enviando ' + contexto + '...' : 'Enviando arquivo...', arquivo.name);
+    url = await enviarComProgresso(arquivo, pasta);
+    atualizarBarra(100, 'Salvando informações...');
+  }
   var registro = { tipo: tipo };
   for (var k in campos) registro[k] = campos[k];
   if (url) registro.arquivo_url = url;
   await inserirRegistro(registro);
-  await carregarDados();
 }
 
 async function excluirItem(id, urlArquivo) {
@@ -537,15 +657,28 @@ async function excluirItem(id, urlArquivo) {
     });
     if (!resp.ok) { throw new Error('Erro ao excluir (' + resp.status + '): ' + (await resp.text())); }
     await carregarDados();
+    mostrarToast('✅ Item excluído.', false);
   } catch (e) { mostrarErro(e.message); }
 }
 
 async function trocarCapa(arquivo) {
+  setBotoesDesabilitados(true);
   try {
-    var url = await enviarArquivo(arquivo, 'capa');
+    var msgErro = validarTamanhoArquivo(arquivo);
+    if (msgErro) { mostrarErro(msgErro); return; }
+    mostrarProgresso('Enviando nova foto de capa...', arquivo.name);
+    var url = await enviarComProgresso(arquivo, 'capa');
+    atualizarBarra(100, 'Salvando informações...');
     await inserirRegistro({ tipo: 'capa', titulo: 'Foto da capa', arquivo_url: url });
     await carregarDados();
-  } catch (e) { mostrarErro(e.message); }
+    ocultarProgresso();
+    mostrarToast('✅ Capa atualizada com sucesso!', false);
+  } catch (e) {
+    ocultarProgresso();
+    mostrarErro(e.message);
+  } finally {
+    setBotoesDesabilitados(false);
+  }
 }
 
 // ============================================================
@@ -671,68 +804,129 @@ function exportarBackup() {
 // ============================================================
 // EVENTOS DOS FORMULÁRIOS
 // ============================================================
+
+// === MARCO ===
 document.getElementById('formMarco').addEventListener('submit', async function (e) {
   e.preventDefault();
+  var arquivo = document.getElementById('marcoFoto').files[0];
+  var msgErro = validarTamanhoArquivo(arquivo);
+  if (msgErro) { mostrarErro(msgErro); return; }
+  setBotoesDesabilitados(true);
   try {
     await adicionarItem('marco', {
       data: document.getElementById('marcoData').value,
       titulo: document.getElementById('marcoTitulo').value,
       descricao: document.getElementById('marcoDescricao').value
-    }, document.getElementById('marcoFoto').files[0], 'marcos');
+    }, arquivo, 'marcos', arquivo ? 'marco' : null);
+    await carregarDados();
+    ocultarProgresso();
     e.target.reset();
-  } catch (err) { mostrarErro(err.message); }
+    mostrarToast('✅ Marco salvo com sucesso!', false);
+  } catch (err) {
+    ocultarProgresso();
+    mostrarErro(err.message);
+  } finally {
+    setBotoesDesabilitados(false);
+  }
 });
 
+// === FOTOGRAFIAS ===
 document.getElementById('formFoto').addEventListener('submit', async function (e) {
   e.preventDefault();
   var arquivos = document.getElementById('fotoArquivo').files;
+  if (!arquivos.length) { mostrarErro('Selecione pelo menos uma imagem.'); return; }
+  var msgErro = validarListaArquivos(arquivos);
+  if (msgErro) { mostrarErro(msgErro); return; }
   var legenda = document.getElementById('fotoLegenda').value;
   var data = document.getElementById('fotoData').value;
+  setBotoesDesabilitados(true);
   try {
     for (var i = 0; i < arquivos.length; i++) {
-      await adicionarItem('fotografia', { legenda: legenda, data: data }, arquivos[i], 'fotografias');
+      await adicionarItem('fotografia', { legenda: legenda, data: data }, arquivos[i], 'fotografias',
+        arquivos.length > 1 ? 'foto ' + (i + 1) + ' de ' + arquivos.length : 'foto');
     }
+    await carregarDados();
+    ocultarProgresso();
     e.target.reset();
-  } catch (err) { mostrarErro(err.message); }
+    mostrarToast('✅ ' + (arquivos.length > 1 ? arquivos.length + ' fotos enviadas com sucesso!' : 'Foto enviada com sucesso!'), false);
+  } catch (err) {
+    ocultarProgresso();
+    mostrarErro(err.message);
+  } finally {
+    setBotoesDesabilitados(false);
+  }
 });
 
+// === DOCUMENTO ===
 document.getElementById('formDocumento').addEventListener('submit', async function (e) {
   e.preventDefault();
+  var arquivo = document.getElementById('docArquivo').files[0];
+  var msgErro = validarTamanhoArquivo(arquivo);
+  if (msgErro) { mostrarErro(msgErro); return; }
+  setBotoesDesabilitados(true);
   try {
     await adicionarItem('documento', {
       titulo: document.getElementById('docTitulo').value,
       data: document.getElementById('docData').value,
       descricao: document.getElementById('docDescricao').value
-    }, document.getElementById('docArquivo').files[0], 'documentos');
+    }, arquivo, 'documentos', 'documento');
+    await carregarDados();
+    ocultarProgresso();
     e.target.reset();
-  } catch (err) { mostrarErro(err.message); }
+    mostrarToast('✅ Documento salvo com sucesso!', false);
+  } catch (err) {
+    ocultarProgresso();
+    mostrarErro(err.message);
+  } finally {
+    setBotoesDesabilitados(false);
+  }
 });
 
+// === DEPOIMENTO ===
 document.getElementById('formDepoimento').addEventListener('submit', async function (e) {
   e.preventDefault();
   var tipoMidia = document.getElementById('depTipoMidia').value;
+  var arquivo = tipoMidia === 'audio' ? document.getElementById('depAudio').files[0] : null;
+  var msgErro = validarTamanhoArquivo(arquivo);
+  if (msgErro) { mostrarErro(msgErro); return; }
   var campos = {
     nome: document.getElementById('depNome').value,
     relacao: document.getElementById('depRelacao').value,
     trecho: document.getElementById('depTrecho').value,
     link: tipoMidia === 'link' ? document.getElementById('depLink').value : null
   };
-  var arquivo = tipoMidia === 'audio' ? document.getElementById('depAudio').files[0] : null;
+  setBotoesDesabilitados(true);
   try {
-    await adicionarItem('depoimento', campos, arquivo, 'depoimentos');
+    await adicionarItem('depoimento', campos, arquivo, 'depoimentos', arquivo ? 'áudio do depoimento' : null);
+    await carregarDados();
+    ocultarProgresso();
     e.target.reset();
-  } catch (err) { mostrarErro(err.message); }
+    mostrarToast('✅ Depoimento salvo com sucesso!', false);
+  } catch (err) {
+    ocultarProgresso();
+    mostrarErro(err.message);
+  } finally {
+    setBotoesDesabilitados(false);
+  }
 });
 
+// === LUGAR ===
 document.getElementById('formLugar').addEventListener('submit', async function (e) {
   e.preventDefault();
+  setBotoesDesabilitados(true);
   try {
     await adicionarItem('lugar', {
       titulo: document.getElementById('lugarNome').value,
       descricao: document.getElementById('lugarMemoria').value
-    }, null, null);
+    }, null, null, null);
+    await carregarDados();
     e.target.reset();
-  } catch (err) { mostrarErro(err.message); }
+    mostrarToast('✅ Lugar salvo com sucesso!', false);
+  } catch (err) {
+    mostrarErro(err.message);
+  } finally {
+    setBotoesDesabilitados(false);
+  }
 });
 
 document.getElementById('depTipoMidia').addEventListener('change', function (e) {
@@ -751,9 +945,9 @@ document.getElementById('capaArquivo').addEventListener('change', function (e) {
 async function iniciar() {
   try {
     setStatus('Conectando ao Supabase...');
-    await carregarDados();       // carrega o acervo (qualquer visitante vê)
-    await restaurarSessao();     // se já estava logado, volta como editor
-    aplicarPermissoes();         // mostra/esconde formulários e botões
+    await carregarDados();
+    await restaurarSessao();
+    aplicarPermissoes();
     setStatus('✅ Conectado ao Supabase — o acervo está na nuvem.', true);
   } catch (erro) {
     console.error(erro);
