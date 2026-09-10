@@ -1,180 +1,41 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Memorial Histórico Digital — Escola Custódio da Silva Lemos</title>
-<style>
-  :root{
-    --tijolo:#b4552d; --tijolo-escuro:#8f3f1f; --creme:#faf6ef;
-    --marrom:#4a3b2f; --cinza:#6b6259; --borda:#e6dccb;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--creme);color:var(--marrom);line-height:1.6}
-  img{max-width:100%;display:block}
-  .container{max-width:1000px;margin:0 auto;padding:0 20px}
+-- ===== 1) BUCKET PÚBLICO =====
+insert into storage.buckets (id, name, public)
+values ('memorial', 'memorial', true)
+on conflict (id) do update set public = true;
 
-  /* ===== CAPA COM A ARTE DO SITE ===== */
-  .capa{
-    position:relative;min-height:380px;
-    background-image:url('capa-site.png');
-    background-size:cover;background-position:center;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .capa::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(180deg,rgba(74,59,47,.45),rgba(74,59,47,.15) 40%,rgba(74,59,47,.55));
-  }
-  .capa-conteudo{position:relative;text-align:center;color:#fff;padding:50px 20px;text-shadow:0 2px 10px rgba(0,0,0,.55)}
-  .capa-conteudo h1{font-size:2.1rem;letter-spacing:.5px;margin-bottom:6px}
-  .capa-conteudo p{font-size:1.05rem;opacity:.97}
-  .capa-conteudo .sub{font-size:.88rem;opacity:.85;margin-top:8px}
-  .btn-capa{
-    position:absolute;bottom:14px;right:14px;z-index:2;
-    background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.5);
-    padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.82rem;
-  }
-  .btn-capa:hover{background:rgba(0,0,0,.75)}
+-- ===== 2) TABELA =====
+create table if not exists public.memorial_data (
+  id uuid primary key default gen_random_uuid(),
+  tipo text,
+  titulo text,
+  descricao text,
+  data text,
+  legenda text,
+  nome text,
+  relacao text,
+  trecho text,
+  link text,
+  arquivo_url text,
+  criado_em timestamptz default now()
+);
 
-  /* ===== STATUS ===== */
-  #status{padding:8px 16px;font-size:.82rem;font-weight:600;text-align:center;background:#fff7e6;color:#8a6d1a}
-  #status.ok{background:#e8f5e9;color:#2e7d32}
-  #status.erro{background:#fdecea;color:#c62828}
+-- ===== 3) PERMISSÕES DA TABELA (visitante anônimo lê e escreve) =====
+alter table public.memorial_data enable row level security;
+drop policy if exists "md_select" on public.memorial_data;
+create policy "md_select" on public.memorial_data for select to anon, authenticated using (true);
+drop policy if exists "md_insert" on public.memorial_data;
+create policy "md_insert" on public.memorial_data for insert to anon, authenticated with check (true);
+drop policy if exists "md_update" on public.memorial_data;
+create policy "md_update" on public.memorial_data for update to anon, authenticated using (true) with check (true);
+drop policy if exists "md_delete" on public.memorial_data;
+create policy "md_delete" on public.memorial_data for delete to anon, authenticated using (true);
 
-  /* ===== CONTADORES ===== */
-  .contadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:28px 0}
-  .contador{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:18px;text-align:center}
-  .contador strong{display:block;font-size:1.8rem;color:var(--tijolo)}
-  .contador span{font-size:.85rem;color:var(--cinza)}
-
-  /* ===== NAVEGAÇÃO ===== */
-  nav{background:#fff;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:50}
-  nav .container{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
-  nav a{display:block;padding:12px 14px;color:var(--marrom);text-decoration:none;font-size:.9rem;font-weight:600}
-  nav a:hover{color:var(--tijolo)}
-
-  /* ===== SEÇÕES ===== */
-  section{padding:44px 0;border-bottom:1px solid var(--borda)}
-  section h2{font-size:1.5rem;color:var(--tijolo-escuro);margin-bottom:6px}
-  section .subtitulo{color:var(--cinza);margin-bottom:22px}
-  .grid-secao{display:grid;grid-template-columns:1fr;gap:24px}
-  @media(min-width:820px){.grid-secao{grid-template-columns:1fr 1fr}}
-
-  /* ===== FORMULÁRIOS ===== */
-  .formulario{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:20px}
-  .formulario h3{font-size:1rem;margin-bottom:14px;color:var(--marrom)}
-  .formulario label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px;color:var(--marrom)}
-  .formulario input[type=text],.formulario input[type=date],.formulario textarea,.formulario select,.formulario input[type=file]{
-    width:100%;padding:9px 12px;border:1px solid var(--borda);border-radius:8px;font-size:.95rem;font-family:inherit;background:#fdfbf7}
-  .formulario textarea{min-height:70px;resize:vertical}
-  .formulario button{width:100%;margin-top:14px;background:var(--tijolo);color:#fff;border:none;padding:11px;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer}
-  .formulario button:hover{background:var(--tijolo-escuro)}
-  .formulario .dica{font-size:.78rem;color:var(--cinza);margin-top:8px}
-
-  /* ===== LISTAS / CARDS ===== */
-  .lista{margin-top:24px;display:grid;gap:14px}
-  .card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
-  .card img{border-radius:8px;max-height:220px;object-fit:cover;width:100%}
-  .card audio{width:100%}
-  .card .titulo{font-weight:700}
-  .card .data{font-size:.8rem;color:var(--tijolo);font-weight:600}
-  .card .descricao{font-size:.9rem;color:var(--cinza)}
-  .card .acoes{display:flex;gap:8px;margin-top:6px}
-  .card .acoes a{color:var(--tijolo);font-size:.85rem;font-weight:600;text-decoration:none}
-  .card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:5px 12px;border-radius:6px;font-size:.8rem;cursor:pointer}
-  .grid-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:24px}
-  .foto-card{background:#fff;border:1px solid var(--borda);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
-  .foto-card img{height:150px;width:100%;object-fit:cover}
-  .foto-card .info{padding:10px;font-size:.85rem}
-  .foto-card .info .legenda{font-weight:600}
-  .foto-card .info .data{color:var(--cinza);font-size:.78rem}
-  .foto-card .acoes{padding:0 10px 10px}
-  .foto-card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
-
-  footer{text-align:center;padding:30px 20px;color:var(--cinza);font-size:.85rem}
-  .vazio{color:var(--cinza);font-style:italic;font-size:.9rem}
-
-  @media(max-width:600px){
-    .capa{min-height:300px}
-    .capa-conteudo h1{font-size:1.5rem}
-    .btn-capa{font-size:.72rem;padding:6px 10px}
-  }
-</style>
-</head>
-<body>
-
-<div id="status">Iniciando...</div>
-
-<!-- ===== CAPA ===== -->
-<div class="capa" id="capa">
-  <div class="capa-conteudo">
-    <h1>Memorial Histórico Digital</h1>
-    <p>Escola Custódio da Silva Lemos</p>
-    <p class="sub">Guanacés, distrito de Cascavel — Ceará · Da casa à escola: memória, mobilização comunitária e cidadania</p>
-  </div>
-  <button class="btn-capa" onclick="document.getElementById('capaArquivo').click()">📷 Trocar foto da capa</button>
-  <input type="file" id="capaArquivo" accept="image/*" style="display:none">
-</div>
-
-<div class="container">
-  <!-- ===== CONTADORES ===== -->
-  <div class="contadores">
-    <div class="contador"><strong id="nFotografias">0</strong><span>fotografias</span></div>
-    <div class="contador"><strong id="nDocumentos">0</strong><span>documentos</span></div>
-    <div class="contador"><strong id="nDepoimentos">0</strong><span>depoimentos</span></div>
-    <div class="contador"><strong id="nMarcos">0</strong><span>marcos na linha do tempo</span></div>
-    <div class="contador"><strong id="nLugares">0</strong><span>lugares no mapa afetivo</span></div>
-  </div>
-</div>
-
-<!-- ===== NAVEGAÇÃO ===== -->
-<nav>
-  <div class="container">
-    <a href="#sobre">Sobre</a>
-    <a href="#linha-do-tempo">Linha do tempo</a>
-    <a href="#fotografias">Fotografias</a>
-    <a href="#documentos">Documentos</a>
-    <a href="#depoimentos">Depoimentos</a>
-    <a href="#mapa-afetivo">Mapa afetivo</a>
-    <a href="#meus-dados">Meus dados</a>
-  </div>
-</nav>
-
-<div class="container">
-
-  <!-- ===== SOBRE ===== -->
-  <section id="sobre">
-    <h2>Sobre o memorial</h2>
-    <p>Antes de existir um prédio escolar em Guanacés, moradores da comunidade abriam as portas de suas próprias casas para ensinar crianças e jovens. Este memorial reúne o que restou — e o que ainda será encontrado — dessa história: fotografias, documentos, gravações e relatos de quem viveu a construção da Escola de Ensino Médio em Tempo Integral Custódio da Silva Lemos.</p>
-    <p style="margin-top:10px">O acervo está sendo construído por estudantes pesquisadores como parte de um projeto do Ceará Científico 2026, com apoio de professores, gestores e da própria comunidade. Tudo o que for enviado fica salvo na nuvem e aparece para qualquer pessoa que visitar o site.</p>
-  </section>
-
-  <!-- ===== LINHA DO TEMPO ===== -->
-  <section id="linha-do-tempo">
-    <h2>01 · Linha do tempo</h2>
-    <p class="subtitulo">Os marcos da trajetória da escola, do ensino em casas de família até a instituição de hoje.</p>
-    <div class="grid-secao">
-      <div class="formulario">
-        <h3>+ Adicionar marco</h3>
-        <form id="formMarco">
-          <label>Data ou período</label>
-          <input type="text" id="marcoData" placeholder="Ex.: 1985">
-          <label>Título do marco</label>
-          <input type="text" id="marcoTitulo" required placeholder="Ex.: Primeiras aulas na casa da Dona Maria">
-          <label>Descrição</label>
-          <textarea id="marcoDescricao" placeholder="Conte o que aconteceu..."></textarea>
-          <label>Foto (opcional)</label>
-          <input type="file" id="marcoFoto" accept="image/*">
-          <button type="submit">Salvar marco</button>
-        </form>
-      </div>
-      <div class="lista" id="listaMarcos"></div>
-    </div>
-  </section>
-
-  <!-- ===== FOTOGRAFIAS ===== -->
-  <section id="fotografias">
-    <h2>02 · Fotografias</h2>
-    <p class="subtitulo">Imagens antigas e atuais da escola, da comunidade e das pessoas que fazem parte dessa história.</p>
-    <div class="grid-secao">
-      <div class="formul
+-- ===== 4) PERMISSÕES DO STORAGE =====
+drop policy if exists "mem_sel" on storage.objects;
+create policy "mem_sel" on storage.objects for select to anon, authenticated using (bucket_id = 'memorial');
+drop policy if exists "mem_ins" on storage.objects;
+create policy "mem_ins" on storage.objects for insert to anon, authenticated with check (bucket_id = 'memorial');
+drop policy if exists "mem_upd" on storage.objects;
+create policy "mem_upd" on storage.objects for update to anon, authenticated using (bucket_id = 'memorial') with check (bucket_id = 'memorial');
+drop policy if exists "mem_del" on storage.objects;
+create policy "mem_del" on storage.objects for delete to anon, authenticated using (bucket_id = 'memorial');
