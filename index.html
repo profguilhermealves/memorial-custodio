@@ -813,14 +813,13 @@ document.getElementById('formDepoimento').addEventListener('submit', function (e
 
 document.getElementById('formLugar').addEventListener('submit', function (e) {
   e.preventDefault();
-  var arquivo = document.getElementById('lugarArquivo').files[0] || null;
   adicionarItem('lugar', {
     titulo: document.getElementById('lugarNome').value.trim(),
     descricao: document.getElementById('lugarMemoria').value.trim()
-  }, arquivo, 'lugares', 'Lugar salvo.');
+  }, null, 'lugares', 'Lugar salvo.');
   this.reset();
 });
-
+  
 // Toggle de mídia do depoimento
 document.getElementById('depTipo').addEventListener('change', function () {
   var v = this.value;
