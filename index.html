@@ -5,90 +5,98 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Memorial Histórico Digital — Escola Custódio da Silva Lemos</title>
 <style>
-:root{--creme:#faf3e3;--marrom:#4a2c17;--laranja:#c47a2d;--cinza:#8a7a6a;--verde:#2e7d32}
+  :root{--tijolo:#b4552d;--tijolo-escuro:#8f3f1f;--creme:#faf6ef;--marrom:#4a3b2f;--cinza:#6b6259;--borda:#e6dccb}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--creme);color:var(--marrom);line-height:1.6}
-img{max-width:100%;display:block}
-.container{max-width:1000px;margin:0 auto;padding:0 20px}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--creme);color:var(--marrom);line-height:1.6}
+  img{max-width:100%;display:block}
+  .container{max-width:1000px;margin:0 auto;padding:0 20px}
 
-#status{padding:8px 16px;font-size:.82rem;font-weight:600;text-align:center;background:#fff7e6;color:#8a6d1a}
-#status.ok{background:#e8f5e9;color:#2e7d32}
-#status.erro{background:#fdecea;color:#c62828}
+  #status{padding:8px 16px;font-size:.82rem;font-weight:600;text-align:center;background:#fff7e6;color:#8a6d1a}
+  #status.ok{background:#e8f5e9;color:#2e7d32}
+  #status.erro{background:#fdecea;color:#c62828}
 
-.capa{position:relative;min-height:430px;background-image:url('capa-site.png');background-size:cover;background-position:center;display:flex;align-items:flex-end}
-.capa::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75),rgba(0,0,0,.15))}
-.capa-conteudo{position:relative;z-index:1;color:#fff;padding:40px 20px;width:100%}
-.capa h1{font-size:2.2rem;margin-bottom:6px}
-.capa .escola{font-size:1.1rem;opacity:.95}
-.capa .subtitulo{font-size:.9rem;opacity:.85;margin-top:8px}
-#btnCapa{position:absolute;top:14px;right:14px;z-index:2;display:none}
+  .capa{position:relative;min-height:720px;background-image:url('capa-site.png');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;cursor:zoom-in}
+  .capa::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(74,59,47,.5),rgba(74,59,47,.12) 45%,rgba(74,59,47,.6))}
+.capa-conteudo{position:relative;text-align:center;color:#fff;padding:50px 20px;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+  .capa-conteudo h1{font-size:2.2rem;letter-spacing:.5px;margin-bottom:4px}
+  .capa-conteudo .escola{font-size:1.15rem;font-weight:600;margin-bottom:6px}
+  .capa-conteudo .sub{font-size:.88rem;opacity:.92}
+.btn-capa{position:absolute;bottom:14px;right:14px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border:1px solid rgba(255,255,255,.5);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.82rem}
+  .btn-capa:hover{background:rgba(0,0,0,.75)}
+.contadores{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin:28px 0}
+  .contador{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:18px;text-align:center}
+  .contador strong{display:block;font-size:1.8rem;color:var(--tijolo)}
+  .contador span{font-size:.85rem;color:var(--cinza)}
+nav{background:#fff;border-top:1px solid var(--borda);border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:50}
+  nav .container{display:flex;flex-wrap:wrap;align-items:center;gap:2px;justify-content:center}
+  nav .marca{font-weight:800;color:var(--tijolo-escuro);padding:12px 14px;font-size:.95rem;text-decoration:none}
+nav a{display:block;padding:12px 12px;color:var(--marrom);text-decoration:none;font-size:.88rem;font-weight:600}
+  nav a:hover{color:var(--tijolo)}
+  nav .login-area{margin-left:auto;display:inline-block;padding:4px 6px}
+  nav .login-area a{display:inline-block;padding:8px 10px;font-size:.84rem}
+section{padding:44px 0;border-bottom:1px solid var(--borda)}
+  section h2{font-size:1.5rem;color:var(--tijolo-escuro);margin-bottom:6px}
+  section .subtitulo{color:var(--cinza);margin-bottom:22px}
+  .grid-secao{display:grid;grid-template-columns:1fr;gap:24px}
+  @media(min-width:820px){.grid-secao{grid-template-columns:1fr 1fr}}
+  .formulario{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:18px;margin-bottom:20px}
+  .formulario h3{color:var(--tijolo-escuro);margin-bottom:12px;font-size:1.05rem}
+  .formulario label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px;color:var(--marrom)}
+  .formulario input,.formulario select,.formulario textarea{width:100%;padding:9px 11px;border:1px solid var(--borda);border-radius:8px;font-size:.95rem;background:#fff}
+  .formulario textarea{min-height:80px;resize:vertical}
+  .formulario button{background:var(--tijolo);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:12px}
+  .formulario button:hover{background:var(--tijolo-escuro)}
+.dica{font-size:.78rem;color:var(--cinza);margin-top:8px}
 
-nav{background:var(--marrom);position:sticky;top:0;z-index:50}
-nav .container{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:10px 20px}
-nav a{color:#f5e6d0;text-decoration:none;font-size:.9rem;padding:6px 10px;border-radius:6px}
-nav a:hover{background:rgba(255,255,255,.15)}
-nav .marca{font-weight:700;font-size:1rem}
-nav .login-area{margin-left:auto;display:flex;align-items:center;gap:10px}
+  .lista{margin-top:24px;display:grid;gap:14px}
+  .card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
+  .card img{border-radius:8px;max-height:220px;object-fit:cover;width:100%;cursor:zoom-in}
+  .card audio{width:100%}
+  .card h4{font-size:1rem;color:var(--marrom)}
+  .card p{font-size:.88rem;color:var(--cinza)}
+  .card .data{color:var(--cinza);font-size:.78rem}
+  .card .acoes{padding:0 10px 10px}
+  .card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
+  .marco{border-left:4px solid var(--tijolo);background:#fff;border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:12px}
+  .grid-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:24px}
+  .foto-card{background:#fff;border:1px solid var(--borda);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+  .foto-card img{width:100%;height:180px;object-fit:cover;cursor:zoom-in}
+  .foto-card .info{padding:10px 12px}
+  .foto-card h4{font-size:.9rem;color:var(--marrom)}
+  .foto-card .data{color:var(--cinza);font-size:.78rem}
+  .foto-card .acoes{padding:0 10px 10px}
+  .foto-card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
 
-section{padding:48px 20px}
-section h2{font-size:1.5rem;margin-bottom:6px}
-.subtitulo{color:var(--cinza);margin-bottom:20px}
-.grid-secao{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-@media(max-width:760px){.grid-secao{grid-template-columns:1fr}}
+  #lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:999;cursor:zoom-out}
+  #lightbox img{max-width:92vw;max-height:92vh;border-radius:8px;box-shadow:0 6px 40px rgba(0,0,0,.6);object-fit:contain}
+  #lightbox .fechar{position:absolute;top:14px;right:22px;color:#fff;font-size:2.2rem;cursor:pointer;line-height:1;font-weight:400}
+#loginModal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:900}
+  .login-box{background:#fff;border-radius:12px;padding:24px;width:min(92vw,380px)}
+  .login-box h3{margin-bottom:10px;color:var(--tijolo-escuro)}
+  .login-box label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px}
+  .login-box input{width:100%;padding:9px 12px;border:1px solid var(--borda);border-radius:8px;font-size:.95rem}
+  .login-box button{width:100%;margin-top:12px;background:var(--tijolo);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer}
+  .login-box button.cancelar{background:#eee;color:var(--marrom);margin-top:6px}
+  #loginMsg{font-size:.83rem;color:#c62828;margin-top:8px;min-height:1em}
 
-.formulario{background:#fff;border:1px solid #e5d9c3;border-radius:12px;padding:20px;margin-bottom:20px}
-.formulario h3{margin-bottom:12px;color:var(--laranja)}
-.formulario label{display:block;font-size:.85rem;font-weight:600;margin:10px 0 4px}
-.formulario input,.formulario select,.formulario textarea{width:100%;padding:9px 10px;border:1px solid #d8c9ae;border-radius:8px;font-size:.95rem;background:#fdfaf4}
-.formulario textarea{min-height:80px;resize:vertical}
-.dica{font-size:.78rem;color:var(--cinza);margin-top:6px}
-button{background:var(--laranja);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:.95rem;cursor:pointer;font-weight:600}
-button:hover{filter:brightness(1.08)}
-button.cancelar{background:#b0a08c}
+  #uploadOverlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:1000}
+  .upload-box{background:#fff;border-radius:12px;padding:24px;width:min(92vw,420px);text-align:center}
+  .upload-titulo{font-size:.95rem;font-weight:600;margin-bottom:12px}
+  .upload-barra{height:10px;background:#eee;border-radius:99px;overflow:hidden}
+  .upload-barra > div{height:100%;width:0;background:linear-gradient(90deg,var(--tijolo),#d98a5f);transition:width .15s ease;border-radius:99px}
+  .upload-pct{font-size:1.15rem;font-weight:800;color:var(--tijolo-escuro)}
+  .upload-detalhe{font-size:.82rem;color:var(--cinza);margin-top:8px;min-height:1em;word-break:break-word}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#2e7d32;color:#fff;padding:11px 20px;border-radius:10px;font-size:.9rem;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:1100;max-width:92vw;text-align:center}
+  #toast.erro{background:#c62828}
+footer{text-align:center;padding:30px 20px;color:var(--cinza);font-size:.85rem}
+  .vazio{color:var(--cinza);font-style:italic;font-size:.9rem}
 
-.lista{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:760px){.lista{grid-template-columns:1fr}}
-.card{background:#fff;border:1px solid #e5d9c3;border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
-.card img{width:100%;height:200px;object-fit:cover;cursor:pointer}
-.card .info{padding:14px}
-.card .info h4{font-size:1rem;margin-bottom:4px}
-.card .info p{font-size:.85rem;color:var(--cinza)}
-.card .info .data{font-size:.78rem;color:var(--laranja);font-weight:600}
-.card .acoes{display:flex;gap:8px;padding:0 14px 14px}
-.card .acoes button{font-size:.8rem;padding:6px 12px}
-
-.marco{border-left:4px solid var(--laranja);background:#fff;border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:12px}
-.marco h4{font-size:1rem}
-.marco .data{font-size:.8rem;color:var(--laranja);font-weight:700}
-.marco p{font-size:.88rem;color:var(--cinza);margin-top:4px}
-
-.contadores{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:30px 20px;background:#fff}
-.contador{background:var(--creme);border:1px solid #e5d9c3;border-radius:12px;padding:16px 22px;text-align:center;min-width:140px}
-.contador strong{display:block;font-size:1.8rem;color:var(--laranja)}
-.contador span{font-size:.8rem;color:var(--cinza)}
-
-#loginModal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:200}
-.login-box{background:#fff;border-radius:14px;padding:28px;width:90%;max-width:380px}
-.login-box h3{margin-bottom:6px}
-.login-box p{font-size:.82rem;color:var(--cinza);margin-bottom:12px}
-#loginMsg{color:#c62828;font-size:.85rem;min-height:20px}
-.login-box button{width:100%;margin-top:8px}
-
-#lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:999;cursor:zoom-out}
-#lightbox img{max-width:92vw;max-height:92vh;border-radius:8px;box-shadow:0 6px 40px rgba(0,0,0,.6);object-fit:contain}
-#lightbox .fechar{position:absolute;top:14px;right:22px;color:#fff;font-size:2.2rem;cursor:pointer;line-height:1;font-weight:400}
-
-#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--marrom);color:#fff;padding:12px 22px;border-radius:30px;font-size:.9rem;opacity:0;transition:opacity .3s;z-index:300;pointer-events:none}
-#toast.erro{background:#c62828}
-
-#progresso{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:250}
-#progresso .box{background:#fff;border-radius:14px;padding:26px;width:90%;max-width:420px;text-align:center}
-#barra{height:10px;background:#eee;border-radius:6px;overflow:hidden;margin-top:12px}
-#barra div{height:100%;width:0;background:var(--laranja);transition:width .2s}
-#progresso p{font-size:.85rem;color:var(--cinza);margin-top:8px}
-
-footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20px;font-size:.9rem}
-.editor-only{display:none}
+  @media(max-width:600px){
+    .capa{min-height:300px}
+    .capa-conteudo h1{font-size:1.5rem}
+    .capa-conteudo .escola{font-size:1rem}
+    .btn-capa{font-size:.72rem;padding:6px 10px}
+  }
 </style>
 </head>
 <body>
@@ -97,25 +105,61 @@ footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20p
 
 <!-- ===== CAPA ===== -->
 <div class="capa" id="capa" onclick="abrirFotoCapa()">
-  <button id="btnCapa" onclick="event.stopPropagation();document.getElementById('capaArquivo').click()">📷 Trocar foto da capa</button>
-  <input type="file" id="capaArquivo" accept="image/*" style="display:none">
   <div class="capa-conteudo">
     <h1>Memorial Histórico Digital</h1>
     <p class="escola">Escola Custódio da Silva Lemos</p>
-    <p class="subtitulo">Guanacés, distrito de Cascavel — Ceará · Da casa à escola: memória, mobilização comunitária e cidadania</p>
+    <p class="sub">Guanacés, distrito de Cascavel — Ceará · Da casa à escola: memória, mobilização comunitária e cidadania</p>
+  </div>
+  <button class="btn-capa" id="btnCapa" style="display:none" onclick="document.getElementById('capaArquivo').click()">📷 Trocar foto da capa</button>
+  <input type="file" id="capaArquivo" accept="image/*" style="display:none">
+</div>
+
+<!-- ===== LIGHTBOX ===== -->
+<div id="lightbox" onclick="fecharLightbox()">
+  <span class="fechar" onclick="fecharLightbox()">✕</span>
+  <img id="lightboxImg" src="" alt="Ampliação da imagem">
+</div>
+
+<!-- ===== MODAL DE LOGIN ===== -->
+<div id="loginModal" onclick="if(event.target===this)fecharLogin()">
+  <div class="login-box">
+    <h3>🔐 Acesso de edição</h3>
+    <p style="font-size:.82rem;color:var(--cinza)">Somente editores autorizados podem adicionar ou modificar conteúdo.</p>
+    <form onsubmit="fazerLogin(); return false;">
+      <label>E-mail</label>
+      <input type="email" id="loginEmail" autocomplete="username" required>
+      <label>Senha</label>
+      <input type="password" id="loginSenha" autocomplete="current-password" required>
+      <button type="submit">Entrar</button>
+    </form>
+    <p id="loginMsg"></p>
+    <button class="cancelar" onclick="fecharLogin()">Cancelar</button>
   </div>
 </div>
 
-<!-- ===== CONTADORES ===== -->
-<div class="contadores">
-  <div class="contador"><strong id="nFotografias">0</strong><span>fotografias</span></div>
-  <div class="contador"><strong id="nDocumentos">0</strong><span>documentos</span></div>
-  <div class="contador"><strong id="nDepoimentos">0</strong><span>depoimentos</span></div>
-  <div class="contador"><strong id="nMarcos">0</strong><span>marcos na linha do tempo</span></div>
-  <div class="contador"><strong id="nLugares">0</strong><span>lugares no mapa afetivo</span></div>
+<!-- ===== OVERLAY DE PROGRESSO DO UPLOAD ===== -->
+<div id="uploadOverlay">
+  <div class="upload-box">
+    <div class="upload-titulo" id="uploadTitulo">Enviando arquivo...</div>
+    <div class="upload-barra"><div id="uploadBarra"></div></div>
+    <div class="upload-pct" id="uploadPct">0%</div>
+    <div class="upload-detalhe" id="uploadDetalhe"></div>
+  </div>
 </div>
 
-<!-- ===== NAV ===== -->
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
+
+<div class="container">
+  <div class="contadores">
+    <div class="contador"><strong id="nFotografias">0</strong><span>fotografias</span></div>
+    <div class="contador"><strong id="nDocumentos">0</strong><span>documentos</span></div>
+    <div class="contador"><strong id="nDepoimentos">0</strong><span>depoimentos</span></div>
+    <div class="contador"><strong id="nMarcos">0</strong><span>marcos na linha do tempo</span></div>
+    <div class="contador"><strong id="nLugares">0</strong><span>lugares no mapa afetivo</span></div>
+  </div>
+</div>
+
 <nav>
   <div class="container">
     <a class="marca" href="#capa">Memorial CSL</a>
@@ -133,18 +177,16 @@ footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20p
   </div>
 </nav>
 
-<!-- ===== SOBRE ===== -->
-<section id="sobre">
-  <div class="container">
-    <h2>Sobre o memorial</h2>
-    <p>Antes de existir um prédio escolar em Guanacés, moradores da comunidade abriam as portas de suas próprias casas para ensinar crianças e jovens.</p>
-    <p style="margin-top:10px">Este memorial reúne o que restou — e o que ainda será encontrado — dessa história: fotografias, documentos, gravações e relatos de quem viveu a construção da Escola de Ensino Médio em Tempo Integral Custódio da Silva Lemos.</p>
-  </div>
-</section>
+<div class="container">
 
-<!-- ===== LINHA DO TEMPO ===== -->
-<section id="linha-do-tempo">
-  <div class="container">
+  <section id="sobre">
+    <h2>Sobre o memorial</h2>
+    <p>Antes de existir um prédio escolar em Guanacés, moradores da comunidade abriam as portas de suas próprias casas para ensinar crianças e jovens.
+Este memorial reúne o que restou — e o que ainda será encontrado — dessa história: fotografias, documentos, gravações e relatos de quem viveu a construção da Escola de Ensino Médio em Tempo Integral Custódio da Silva Lemos.</p>
+    <p style="margin-top:10px">O acervo está sendo construído por estudantes pesquisadores como parte de um projeto do Ceará Científico 2026, com apoio de professores, gestores e da própria comunidade. Qualquer visitante pode explorar o acervo; somente editores autorizados podem adicionar conteúdo.</p>
+  </section>
+
+  <section id="linha-do-tempo">
     <h2>01 · Linha do tempo</h2>
     <p class="subtitulo">Os marcos da trajetória da escola, do ensino em casas de família até a instituição de hoje.</p>
     <div class="grid-secao">
@@ -160,17 +202,14 @@ footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20p
           <label>Foto (opcional)</label>
           <input type="file" id="marcoArquivo" accept="image/*">
           <p class="dica">Tamanho máximo por arquivo: 50 MB.</p>
-          <button type="submit" style="margin-top:12px">Salvar marco</button>
+          <button type="submit">Salvar marco</button>
         </form>
       </div>
       <div class="lista" id="listaMarcos"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ===== FOTOGRAFIAS ===== -->
-<section id="fotografias">
-  <div class="container">
+  <section id="fotografias">
     <h2>02 · Fotografias</h2>
     <p class="subtitulo">Imagens antigas e atuais da escola, da comunidade e das pessoas que fazem parte dessa história. Clique em uma foto para ampliá-la.</p>
     <div class="grid-secao">
@@ -184,17 +223,14 @@ footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20p
           <label>Data ou período (opcional)</label>
           <input type="text" id="fotoData" placeholder="Ex.: 1998">
           <p class="dica">Ao enviar várias fotos de uma vez, a legenda e a data serão aplicadas a todas. Tamanho máximo por arquivo: 50 MB.</p>
-          <button type="submit" style="margin-top:12px">Salvar fotografia(s)</button>
+          <button type="submit">Salvar fotografia(s)</button>
         </form>
       </div>
-      <div class="lista" id="listaFotos"></div>
+      <div class="grid-fotos" id="gridFotos"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ===== DOCUMENTOS ===== -->
-<section id="documentos">
-  <div class="container">
+  <section id="documentos">
     <h2>03 · Documentos</h2>
     <p class="subtitulo">Atas, livros de matrícula, projetos pedagógicos, jornais e registros oficiais relacionados à escola.</p>
     <div class="grid-secao">
@@ -210,17 +246,14 @@ footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20p
           <label>Descrição (opcional)</label>
           <textarea id="docDescricao" placeholder="Detalhes sobre o documento..."></textarea>
           <p class="dica">Arquivos bem grandes podem demorar alguns segundos para carregar. Tamanho máximo: 50 MB.</p>
-          <button type="submit" style="margin-top:12px">Salvar documento</button>
+          <button type="submit">Salvar documento</button>
         </form>
       </div>
       <div class="lista" id="listaDocumentos"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ===== DEPOIMENTOS ===== -->
-<section id="depoimentos">
-  <div class="container">
+  <section id="depoimentos">
     <h2>04 · Depoimentos</h2>
     <p class="subtitulo">Relatos de ex-alunos, ex-professores, gestores e moradores pioneiros — em texto, áudio ou vídeo.</p>
     <div class="grid-secao">
@@ -240,24 +273,21 @@ footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20p
             <option value="video">Link de vídeo</option>
           </select>
           <div id="depLinkDiv" style="display:none">
-            <label>Link do vídeo</label>
+            <label>Link do vídeo ou áudio</label>
             <input type="text" id="depLink" placeholder="https://...">
           </div>
           <div id="depAudioDiv" style="display:none">
             <label>Arquivo de áudio</label>
             <input type="file" id="depAudio" accept="audio/*">
           </div>
-          <button type="submit" style="margin-top:12px">Salvar depoimento</button>
+          <button type="submit">Salvar depoimento</button>
         </form>
       </div>
       <div class="lista" id="listaDepoimentos"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ===== MAPA AFETIVO ===== -->
-<section id="mapa-afetivo">
-  <div class="container">
+  <section id="mapa-afetivo">
     <h2>05 · Mapa afetivo</h2>
     <p class="subtitulo">Lugares de Guanacés associados à memória escolar — as casas onde havia aula, pontos de referência, a escola em diferentes momentos.</p>
     <div class="grid-secao">
@@ -267,66 +297,28 @@ footer{background:var(--marrom);color:#f5e6d0;text-align:center;padding:26px 20p
           <label>Nome do lugar</label>
           <input type="text" id="lugarNome" required placeholder="Ex.: Casa da Dona Maria">
           <label>Memória associada</label>
-          <textarea id="lugarMemoria" placeholder="O que acontecia nesse lugar?"></textarea>
-          <label>Foto (opcional)</label>
-          <input type="file" id="lugarArquivo" accept="image/*">
-          <button type="submit" style="margin-top:12px">Salvar lugar</button>
+          <textarea id="lugarMemoria" placeholder="O que esse lugar representa?"></textarea>
+          <button type="submit">Salvar lugar</button>
         </form>
       </div>
       <div class="lista" id="listaLugares"></div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ===== MEUS DADOS ===== -->
-<section id="meus-dados">
-  <div class="container">
+  <section id="meus-dados">
     <h2>Meus dados</h2>
     <p class="subtitulo">Tudo o que está aqui é salvo na nuvem (Supabase) e aparece para qualquer visitante. Use o botão abaixo para guardar uma cópia de segurança do acervo.</p>
     <div class="formulario" style="max-width:420px">
       <button type="button" onclick="exportarBackup()">⬇️ Exportar cópia de segurança (.json)</button>
     </div>
-  </div>
-</section>
+  </section>
+
+</div>
 
 <footer>
   Memorial Histórico Digital — Escola Custódio da Silva Lemos<br>
   Guanacés, Cascavel/CE · Projeto Ceará Científico 2026
 </footer>
-
-<!-- ===== MODAL DE LOGIN ===== -->
-<div id="loginModal" onclick="if(event.target===this)fecharLogin()">
-  <div class="login-box">
-    <h3>🔐 Acesso de edição</h3>
-    <p>Somente editores autorizados podem adicionar ou modificar conteúdo.</p>
-    <form onsubmit="fazerLogin(); return false;">
-      <label>E-mail</label>
-      <input type="email" id="loginEmail" autocomplete="username" required>
-      <label>Senha</label>
-      <input type="password" id="loginSenha" autocomplete="current-password" required>
-      <button type="submit">Entrar</button>
-    </form>
-    <p id="loginMsg"></p>
-    <button class="cancelar" onclick="fecharLogin()">Cancelar</button>
-  </div>
-</div>
-
-<!-- ===== LIGHTBOX ===== -->
-<div id="lightbox" onclick="fecharLightbox()">
-  <span class="fechar" onclick="fecharLightbox()">✕</span>
-  <img id="lightboxImg" src="" alt="Ampliação da imagem">
-</div>
-
-<!-- ===== PROGRESSO DE UPLOAD ===== -->
-<div id="progresso">
-  <div class="box">
-    <p id="progressoTexto">Enviando arquivo...</p>
-    <div id="barra"><div id="barraFill"></div></div>
-    <p id="progressoDetalhe"></p>
-  </div>
-</div>
-
-<div id="toast"></div>
 
 <script>
 // ============================================================
@@ -364,14 +356,14 @@ function mostrarToast(msg, erro) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(function () { t.style.opacity = '0'; }, 4000);
 }
-
 function mostrarErro(msg) {
-  setStatus(msg, false);
+  console.error(msg);
+  setStatus('❌ ' + msg, false);
   mostrarToast(msg, true);
 }
 
 // ============================================================
-// SESSÃO E TOKENS
+// GERENCIAMENTO DE SESSÃO — evita o erro "JWT expired"
 // ============================================================
 function limparSessao() {
   tokenAcesso = null;
@@ -388,16 +380,18 @@ function decodificarJWT(token) {
     var parte = token.split('.')[1];
     parte = parte.replace(/-/g, '+').replace(/_/g, '/');
     while (parte.length % 4) parte += '=';
-    return JSON.parse(decodeURIComponent(escape(atob(parte))));
+    return JSON.parse(atob(parte));
   } catch (e) { return null; }
 }
 
+// Considera expirado se faltar menos de 1 minuto para vencer
 function tokenExpirado(token) {
   var dados = decodificarJWT(token);
   if (!dados || !dados.exp) return true;
-  return (dados.exp * 1000) < Date.now();
+  return dados.exp * 1000 < Date.now() + 60000;
 }
 
+// Renova o token de acesso usando o refresh_token
 async function renovarToken() {
   if (!refreshToken) { limparSessao(); return false; }
   try {
@@ -418,6 +412,7 @@ async function renovarToken() {
   } catch (e) { limparSessao(); return false; }
 }
 
+// Garante um token válido antes de qualquer requisição
 async function garantirToken() {
   if (tokenAcesso && tokenExpirado(tokenAcesso)) {
     await renovarToken();
@@ -448,26 +443,78 @@ async function requisicao(url, opcoes) {
 // VALIDAÇÃO DE TAMANHO DOS ARQUIVOS
 // ============================================================
 function tamanhoLegivel(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+  if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  if (bytes >= 1024) return (bytes / 1024).toFixed(0) + ' KB';
+  return bytes + ' B';
 }
 
 function validarTamanhoArquivo(arquivo) {
-  if (arquivo && arquivo.size > MAX_ARQUIVO_BYTES) {
-    return 'Arquivo muito grande (' + tamanhoLegivel(arquivo.size) + '). Máximo: ' + MAX_ARQUIVO_MB + ' MB.';
+  if (!arquivo) return null;
+  if (arquivo.size > MAX_ARQUIVO_BYTES) {
+    return 'O arquivo "' + arquivo.name + '" tem ' + tamanhoLegivel(arquivo.size) +
+           ' e passou do limite de ' + MAX_ARQUIVO_MB + ' MB por arquivo. ' +
+           'Escolha um arquivo menor — para áudio, prefira MP3; para imagens, reduza a resolução.';
+  }
+  return null;
+}
+function validarListaArquivos(arquivos) {
+  for (var i = 0; i < arquivos.length; i++) {
+    var msg = validarTamanhoArquivo(arquivos[i]);
+    if (msg) return msg;
   }
   return null;
 }
 
 // ============================================================
-// LOGIN / LOGOUT
+// OVERLAY DE PROGRESSO DO UPLOAD
+// ============================================================
+function mostrarProgresso(titulo, detalhe) {
+  document.getElementById('uploadOverlay').style.display = 'flex';
+  document.getElementById('uploadTitulo').textContent = titulo || 'Enviando arquivo...';
+  document.getElementById('uploadDetalhe').textContent = detalhe || '';
+  atualizarBarra(0);
+}
+function atualizarBarra(pct, detalhe) {
+  document.getElementById('uploadBarra').style.width = Math.min(100, Math.max(0, pct)) + '%';
+  document.getElementById('uploadPct').textContent = Math.round(pct) + '%';
+  if (detalhe !== undefined) document.getElementById('uploadDetalhe').textContent = detalhe;
+}
+function ocultarProgresso() {
+  document.getElementById('uploadOverlay').style.display = 'none';
+}
+
+function setBotoesDesabilitados(desabilitar) {
+  var botoes = document.querySelectorAll('button[type="submit"]');
+  for (var i = 0; i < botoes.length; i++) botoes[i].disabled = desabilitar;
+}
+
+// ============================================================
+// LIGHTBOX — abrir foto ampliada ao clicar
+// ============================================================
+function abrirFoto(url) {
+  if (!url) return;
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').style.display = 'flex';
+}
+function abrirFotoCapa() {
+  if (capaUrlAtual) abrirFoto(capaUrlAtual);
+}
+function fecharLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+  document.getElementById('lightboxImg').src = '';
+}
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') fecharLightbox();
+});
+
+// ============================================================
+// MODAL DE LOGIN
 // ============================================================
 function abrirLogin() {
   document.getElementById('loginMsg').textContent = '';
   document.getElementById('loginModal').style.display = 'flex';
 }
-
 function fecharLogin() {
   document.getElementById('loginModal').style.display = 'none';
 }
@@ -553,11 +600,11 @@ function aplicarPermissoes() {
   if (podeEditar) {
     entrar.style.display = 'none';
     info.style.display = 'inline';
-    info.innerHTML = '👤 ' + esc(emailUsuario) + ' (editor) · <a href="#" onclick="sair()" style="color:#f5e6d0">Sair</a>';
+    info.innerHTML = '👤 ' + esc(emailUsuario) + ' (editor) · <a href="#" onclick="sair()">Sair</a>';
   } else if (tokenAcesso) {
     entrar.style.display = 'none';
     info.style.display = 'inline';
-    info.innerHTML = '👤 ' + esc(emailUsuario) + ' (somente leitura) · <a href="#" onclick="sair()" style="color:#f5e6d0">Sair</a>';
+    info.innerHTML = '👤 ' + esc(emailUsuario) + ' (somente leitura) · <a href="#" onclick="sair()">Sair</a>';
   } else {
     entrar.style.display = 'inline';
     info.style.display = 'none';
@@ -609,25 +656,29 @@ async function excluirItem(id, urlArquivo) {
   } catch (e) { mostrarErro(e.message); }
 }
 
+async function trocarCapa(arquivo) {
+  setBotoesDesabilitados(true);
+  try {
+    var msgErro = validarTamanhoArquivo(arquivo);
+    if (msgErro) { mostrarErro(msgErro); return; }
+    mostrarProgresso('Enviando nova foto de capa...', arquivo.name);
+    var url = await enviarComProgresso(arquivo, 'capa');
+    atualizarBarra(100, 'Salvando informações...');
+    await inserirRegistro({ tipo: 'capa', titulo: 'Foto da capa', arquivo_url: url });
+    await carregarDados();
+    ocultarProgresso();
+    mostrarToast('✅ Capa atualizada com sucesso!', false);
+  } catch (e) {
+    ocultarProgresso();
+    mostrarErro(e.message);
+  } finally {
+    setBotoesDesabilitados(false);
+  }
+}
+
 // ============================================================
 // UPLOAD COM BARRA DE PROGRESSO
 // ============================================================
-function mostrarProgresso(texto, detalhe) {
-  document.getElementById('progressoTexto').textContent = texto || 'Enviando arquivo...';
-  document.getElementById('progressoDetalhe').textContent = detalhe || '';
-  atualizarBarra(0, '');
-  document.getElementById('progresso').style.display = 'flex';
-}
-
-function ocultarProgresso() {
-  document.getElementById('progresso').style.display = 'none';
-}
-
-function atualizarBarra(pct, detalhe) {
-  document.getElementById('barraFill').style.width = pct + '%';
-  if (detalhe) document.getElementById('progressoDetalhe').textContent = detalhe;
-}
-
 function enviarArquivoComProgresso(arquivo, pasta, aoProgresso) {
   return new Promise(function (resolver, rejeitar) {
     var msgErro = validarTamanhoArquivo(arquivo);
@@ -654,7 +705,9 @@ function enviarArquivoComProgresso(arquivo, pasta, aoProgresso) {
           if (renovou) { iniciarEnvio(); }
           else { rejeitar(new Error('Sua sessão expirou. Faça login novamente.')); }
         } else {
-          rejeitar(new Error('Erro ao enviar arquivo (' + xhr.status + ').'));
+          var msg = '';
+          try { msg = JSON.parse(xhr.responseText).message || ''; } catch (err2) { msg = xhr.responseText; }
+          rejeitar(new Error('Falha ao enviar arquivo (' + xhr.status + '): ' + msg));
         }
       };
       xhr.onerror = function () {
@@ -674,9 +727,6 @@ function enviarComProgresso(arquivo, pasta) {
   });
 }
 
-// ============================================================
-// AÇÕES DOS FORMULÁRIOS
-// ============================================================
 async function adicionarItem(tipo, campos, arquivo, pasta, contexto) {
   if (!podeEditar) { mostrarErro('Você não tem permissão para adicionar.'); return; }
   setStatus('Salvando...', true);
@@ -697,9 +747,14 @@ async function adicionarItem(tipo, campos, arquivo, pasta, contexto) {
   } catch (e) {
     ocultarProgresso();
     mostrarErro(e.message);
+  } finally {
+    setBotoesDesabilitados(false);
   }
 }
 
+// ============================================================
+// AÇÕES DOS FORMULÁRIOS
+// ============================================================
 document.getElementById('formMarco').addEventListener('submit', function (e) {
   e.preventDefault();
   var arquivo = document.getElementById('marcoArquivo').files[0] || null;
@@ -718,7 +773,7 @@ document.getElementById('formFoto').addEventListener('submit', function (e) {
   var data = document.getElementById('fotoData').value.trim();
   if (!arquivos.length) return;
   var pendentes = Array.prototype.slice.call(arquivos).map(function (arquivo) {
-    return adicionarItem('foto', { titulo: legenda, data: data }, arquivo, 'fotos', 'Fotografia salva.');
+    return adicionarItem('fotografia', { titulo: legenda, data: data }, arquivo, 'fotos', 'Fotografia salva.');
   });
   Promise.all(pendentes).then(function () { document.getElementById('formFoto').reset(); });
 });
@@ -773,9 +828,7 @@ document.getElementById('depTipo').addEventListener('change', function () {
   document.getElementById('depAudioDiv').style.display = v === 'audio' ? 'block' : 'none';
 });
 
-// ============================================================
-// CAPA E LIGHTBOX
-// ============================================================
+// Trocar capa
 document.getElementById('capaArquivo').addEventListener('change', function () {
   var arquivo = this.files[0];
   if (!arquivo) return;
@@ -784,43 +837,11 @@ document.getElementById('capaArquivo').addEventListener('change', function () {
   this.value = '';
 });
 
-async function trocarCapa(arquivo) {
-  try {
-    var msgErro = validarTamanhoArquivo(arquivo);
-    if (msgErro) { mostrarErro(msgErro); return; }
-    mostrarProgresso('Enviando nova foto de capa...', arquivo.name);
-    var url = await enviarComProgresso(arquivo, 'capa');
-    atualizarBarra(100, 'Salvando informações...');
-    await inserirRegistro({ tipo: 'capa', titulo: 'Foto da capa', arquivo_url: url });
-    await carregarDados();
-    ocultarProgresso();
-    mostrarToast('✅ Capa atualizada com sucesso!', false);
-  } catch (e) {
-    ocultarProgresso();
-    mostrarErro(e.message);
-  }
-}
-
-function abrirFotoCapa() {
-  if (capaUrlAtual) abrirLightbox(capaUrlAtual);
-}
-
-function abrirLightbox(url) {
-  document.getElementById('lightboxImg').src = url;
-  document.getElementById('lightbox').style.display = 'flex';
-}
-
-function fecharLightbox() {
-  document.getElementById('lightbox').style.display = 'none';
-}
-
 // ============================================================
-// RENDERIZAÇÃO
+// RENDERIZAR TUDO
 // ============================================================
-function esc(t) { return String(t || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
 function renderizarTudo() {
-  var fotos = itens.filter(function (i) { return i.tipo === 'foto'; });
+  var fotos = itens.filter(function (i) { return i.tipo === 'fotografia'; });
   var docs = itens.filter(function (i) { return i.tipo === 'documento'; });
   var deps = itens.filter(function (i) { return i.tipo === 'depoimento'; });
   var marcos = itens.filter(function (i) { return i.tipo === 'marco'; });
@@ -840,13 +861,14 @@ function renderizarTudo() {
     capaUrlAtual = null;
     document.getElementById('capa').style.backgroundImage = "url('capa-site.png')";
   }
-
   renderMarcos(marcos);
   renderFotos(fotos);
   renderDocumentos(docs);
   renderDepoimentos(deps);
   renderLugares(lugares);
 }
+
+function esc(t) { return String(t || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function botoesExcluir(id, urlArquivo) {
   if (!podeEditar) return '';
@@ -855,24 +877,24 @@ function botoesExcluir(id, urlArquivo) {
 
 function renderMarcos(marcos) {
   var el = document.getElementById('listaMarcos');
-  if (!marcos.length) { el.innerHTML = '<p class="subtitulo">Nenhum marco cadastrado ainda.</p>'; return; }
+  if (!marcos.length) { el.innerHTML = '<p class="vazio">Nenhum marco cadastrado ainda.</p>'; return; }
   el.innerHTML = marcos.map(function (m) {
     return '<div class="marco">' +
       '<span class="data">' + esc(m.data || '') + '</span>' +
       '<h4>' + esc(m.titulo) + '</h4>' +
       (m.descricao ? '<p>' + esc(m.descricao) + '</p>' : '') +
-      (m.arquivo_url ? '<img src="' + m.arquivo_url + '" onclick="abrirLightbox(\'' + m.arquivo_url + '\')" style="margin-top:10px;border-radius:8px;cursor:pointer">' : '') +
+      (m.arquivo_url ? '<img src="' + m.arquivo_url + '" onclick="abrirFoto(\'' + m.arquivo_url + '\')" style="margin-top:10px;border-radius:8px;cursor:zoom-in">' : '') +
       botoesExcluir(m.id, m.arquivo_url) +
       '</div>';
   }).join('');
 }
 
 function renderFotos(fotos) {
-  var el = document.getElementById('listaFotos');
-  if (!fotos.length) { el.innerHTML = '<p class="subtitulo">Nenhuma fotografia cadastrada ainda.</p>'; return; }
+  var el = document.getElementById('gridFotos');
+  if (!fotos.length) { el.innerHTML = '<p class="vazio">Nenhuma fotografia cadastrada ainda.</p>'; return; }
   el.innerHTML = fotos.map(function (f) {
-    return '<div class="card">' +
-      '<img src="' + f.arquivo_url + '" onclick="abrirLightbox(\'' + f.arquivo_url + '\')">' +
+    return '<div class="foto-card">' +
+      '<img src="' + f.arquivo_url + '" onclick="abrirFoto(\'' + f.arquivo_url + '\')">' +
       '<div class="info">' +
       (f.data ? '<span class="data">' + esc(f.data) + '</span>' : '') +
       (f.titulo ? '<h4>' + esc(f.titulo) + '</h4>' : '') +
@@ -884,12 +906,12 @@ function renderFotos(fotos) {
 
 function renderDocumentos(docs) {
   var el = document.getElementById('listaDocumentos');
-  if (!docs.length) { el.innerHTML = '<p class="subtitulo">Nenhum documento cadastrado ainda.</p>'; return; }
+  if (!docs.length) { el.innerHTML = '<p class="vazio">Nenhum documento cadastrado ainda.</p>'; return; }
   el.innerHTML = docs.map(function (d) {
     var isPdf = d.arquivo_url && d.arquivo_url.toLowerCase().indexOf('.pdf') > -1;
     var link = isPdf
-      ? '<a href="' + d.arquivo_url + '" target="_blank" style="color:var(--laranja);font-weight:600">📄 Abrir PDF</a>'
-      : '<img src="' + d.arquivo_url + '" onclick="abrirLightbox(\'' + d.arquivo_url + '\')" style="cursor:pointer">';
+      ? '<a href="' + d.arquivo_url + '" target="_blank" style="color:var(--tijolo);font-weight:600">📄 Abrir PDF</a>'
+      : '<img src="' + d.arquivo_url + '" onclick="abrirFoto(\'' + d.arquivo_url + '\')" style="cursor:zoom-in">';
     return '<div class="card">' + link +
       '<div class="info">' +
       (d.data ? '<span class="data">' + esc(d.data) + '</span>' : '') +
@@ -903,13 +925,13 @@ function renderDocumentos(docs) {
 
 function renderDepoimentos(deps) {
   var el = document.getElementById('listaDepoimentos');
-  if (!deps.length) { el.innerHTML = '<p class="subtitulo">Nenhum depoimento cadastrado ainda.</p>'; return; }
+  if (!deps.length) { el.innerHTML = '<p class="vazio">Nenhum depoimento cadastrado ainda.</p>'; return; }
   el.innerHTML = deps.map(function (d) {
     var midia = '';
     if (d.tipo_midia === 'audio' && d.arquivo_url) {
       midia = '<audio controls style="width:100%;margin-top:8px"><source src="' + d.arquivo_url + '"></audio>';
     } else if (d.tipo_midia === 'video' && d.link) {
-      midia = '<a href="' + d.link + '" target="_blank" style="color:var(--laranja);font-weight:600;display:inline-block;margin-top:8px">▶️ Ver vídeo</a>';
+      midia = '<a href="' + d.link + '" target="_blank" style="color:var(--tijolo);font-weight:600;display:inline-block;margin-top:8px">▶️ Ver vídeo</a>';
     }
     return '<div class="card">' +
       '<div class="info">' +
@@ -925,10 +947,10 @@ function renderDepoimentos(deps) {
 
 function renderLugares(lugares) {
   var el = document.getElementById('listaLugares');
-  if (!lugares.length) { el.innerHTML = '<p class="subtitulo">Nenhum lugar cadastrado ainda.</p>'; return; }
+  if (!lugares.length) { el.innerHTML = '<p class="vazio">Nenhum lugar cadastrado ainda.</p>'; return; }
   el.innerHTML = lugares.map(function (l) {
     return '<div class="card">' +
-      (l.arquivo_url ? '<img src="' + l.arquivo_url + '" onclick="abrirLightbox(\'' + l.arquivo_url + '\')">' : '') +
+      (l.arquivo_url ? '<img src="' + l.arquivo_url + '" onclick="abrirFoto(\'' + l.arquivo_url + '\')">' : '') +
       '<div class="info">' +
       '<h4>📍 ' + esc(l.titulo) + '</h4>' +
       (l.descricao ? '<p>' + esc(l.descricao) + '</p>' : '') +
