@@ -52,17 +52,17 @@ section{padding:44px 0;border-bottom:1px solid var(--borda)}
   .card{background:#fff;border:1px solid var(--borda);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px}
   .card img{border-radius:8px;max-height:220px;object-fit:cover;width:100%;cursor:zoom-in}
   .card audio{width:100%}
-  .card h4{font-size:1rem;color:var(--marrom)}
-  .card p{font-size:.88rem;color:var(--cinza)}
   .card .data{color:var(--cinza);font-size:.78rem}
-  .card .acoes{padding:0 10px 10px}
+  .card .titulo{font-weight:700;color:var(--marrom)}
+  .card .descricao{font-size:.88rem;color:var(--cinza)}
+  .card .acoes{display:flex;gap:8px;align-items:center;margin-top:4px}
+  .card .acoes a{color:var(--tijolo);font-weight:600;text-decoration:none}
   .card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
-  .marco{border-left:4px solid var(--tijolo);background:#fff;border-radius:0 10px 10px 0;padding:14px 16px;margin-bottom:12px}
   .grid-fotos{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:24px}
   .foto-card{background:#fff;border:1px solid var(--borda);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
   .foto-card img{width:100%;height:180px;object-fit:cover;cursor:zoom-in}
   .foto-card .info{padding:10px 12px}
-  .foto-card h4{font-size:.9rem;color:var(--marrom)}
+  .foto-card .legenda{font-size:.9rem;font-weight:600;color:var(--marrom)}
   .foto-card .data{color:var(--cinza);font-size:.78rem}
   .foto-card .acoes{padding:0 10px 10px}
   .foto-card .acoes button{background:#f4e9dd;border:1px solid var(--borda);color:var(--tijolo-escuro);padding:4px 10px;border-radius:6px;font-size:.78rem;cursor:pointer}
@@ -117,7 +117,8 @@ footer{text-align:center;padding:30px 20px;color:var(--cinza);font-size:.85rem}
 <!-- ===== LIGHTBOX ===== -->
 <div id="lightbox" onclick="fecharLightbox()">
   <span class="fechar" onclick="fecharLightbox()">✕</span>
-  <img id="lightboxImg" src="" alt="Ampliação da imagem">
+  <img id="lightboxImg" src="" alt="Ampliação da imagem" style="display:none">
+  <iframe id="lightboxFrame" src="" style="display:none;width:92vw;height:92vh;border:none;border-radius:8px;background:#fff"></iframe>
 </div>
 
 <!-- ===== MODAL DE LOGIN ===== -->
@@ -494,7 +495,18 @@ function setBotoesDesabilitados(desabilitar) {
 // ============================================================
 function abrirFoto(url) {
   if (!url) return;
-  document.getElementById('lightboxImg').src = url;
+  var img = document.getElementById('lightboxImg');
+  var frame = document.getElementById('lightboxFrame');
+  if (url.toLowerCase().indexOf('.pdf') > -1) {
+    img.style.display = 'none';
+    frame.src = url;
+    frame.style.display = 'block';
+  } else {
+    frame.style.display = 'none';
+    frame.src = '';
+    img.src = url;
+    img.style.display = 'block';
+  }
   document.getElementById('lightbox').style.display = 'flex';
 }
 function abrirFotoCapa() {
@@ -503,6 +515,9 @@ function abrirFotoCapa() {
 function fecharLightbox() {
   document.getElementById('lightbox').style.display = 'none';
   document.getElementById('lightboxImg').src = '';
+  document.getElementById('lightboxImg').style.display = 'block';
+  document.getElementById('lightboxFrame').src = '';
+  document.getElementById('lightboxFrame').style.display = 'none';
 }
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') fecharLightbox();
@@ -773,7 +788,7 @@ document.getElementById('formFoto').addEventListener('submit', function (e) {
   var data = document.getElementById('fotoData').value.trim();
   if (!arquivos.length) return;
   var pendentes = Array.prototype.slice.call(arquivos).map(function (arquivo) {
-    return adicionarItem('fotografia', { titulo: legenda, data: data }, arquivo, 'fotos', 'Fotografia salva.');
+    return adicionarItem('fotografia', { legenda: legenda, data: data }, arquivo, 'fotos', 'Fotografia salva.');
   });
   Promise.all(pendentes).then(function () { document.getElementById('formFoto').reset(); });
 });
@@ -793,9 +808,9 @@ document.getElementById('formDepoimento').addEventListener('submit', function (e
   e.preventDefault();
   var tipo = document.getElementById('depTipo').value;
   var campos = {
-    titulo: document.getElementById('depNome').value.trim(),
-    descricao: document.getElementById('depTexto').value.trim(),
-    data: document.getElementById('depRelacao').value.trim()
+    nome: document.getElementById('depNome').value.trim(),
+    relacao: document.getElementById('depRelacao').value.trim(),
+    trecho: document.getElementById('depTexto').value.trim()
   };
   var arquivo = null, pasta = 'depoimentos';
   if (tipo === 'audio') {
@@ -819,7 +834,7 @@ document.getElementById('formLugar').addEventListener('submit', function (e) {
   }, null, 'lugares', 'Lugar salvo.');
   this.reset();
 });
-  
+
 // Toggle de mídia do depoimento
 document.getElementById('depTipo').addEventListener('change', function () {
   var v = this.value;
@@ -869,92 +884,82 @@ function renderizarTudo() {
 
 function esc(t) { return String(t || '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
-function botoesExcluir(id, urlArquivo) {
-  if (!podeEditar) return '';
-  return '<div class="acoes"><button onclick="excluirItem(\'' + id + '\',\'' + (urlArquivo || '') + '\')">🗑️ Excluir</button></div>';
-}
-
 function renderMarcos(marcos) {
+  marcos = marcos.slice().sort(function (a, b) {
+    var anoA = parseInt(String(a.data || '').match(/\d{4}/), 10) || 9999;
+    var anoB = parseInt(String(b.data || '').match(/\d{4}/), 10) || 9999;
+    return anoA - anoB;
+  });
   var el = document.getElementById('listaMarcos');
-  if (!marcos.length) { el.innerHTML = '<p class="vazio">Nenhum marco cadastrado ainda.</p>'; return; }
+  if (!marcos.length) { el.innerHTML = '<p class="vazio">Nenhum marco adicionado ainda.</p>'; return; }
   el.innerHTML = marcos.map(function (m) {
-    return '<div class="marco">' +
-      '<span class="data">' + esc(m.data || '') + '</span>' +
-      '<h4>' + esc(m.titulo) + '</h4>' +
-      (m.descricao ? '<p>' + esc(m.descricao) + '</p>' : '') +
-      (m.arquivo_url ? '<img src="' + m.arquivo_url + '" onclick="abrirFoto(\'' + m.arquivo_url + '\')" style="margin-top:10px;border-radius:8px;cursor:zoom-in">' : '') +
-      botoesExcluir(m.id, m.arquivo_url) +
+    var btn = podeEditar ? '<button onclick="excluirItem(\'' + m.id + '\',\'' + (m.arquivo_url || '') + '\')">🗑️ Excluir</button>' : '';
+    return '<div class="card">' +
+      (m.arquivo_url ? '<img src="' + m.arquivo_url + '" alt="' + esc(m.titulo) + '" onclick="abrirFoto(\'' + m.arquivo_url + '\')">' : '') +
+      '<div class="data">' + esc(m.data || '') + '</div>' +
+      '<div class="titulo">' + esc(m.titulo) + '</div>' +
+      '<div class="descricao">' + esc(m.descricao || '') + '</div>' +
+      (btn ? '<div class="acoes">' + btn + '</div>' : '') +
       '</div>';
   }).join('');
 }
 
 function renderFotos(fotos) {
   var el = document.getElementById('gridFotos');
-  if (!fotos.length) { el.innerHTML = '<p class="vazio">Nenhuma fotografia cadastrada ainda.</p>'; return; }
+  if (!fotos.length) { el.innerHTML = '<p class="vazio">Nenhuma fotografia adicionada ainda.</p>'; return; }
   el.innerHTML = fotos.map(function (f) {
+    var btn = podeEditar ? '<button onclick="excluirItem(\'' + f.id + '\',\'' + f.arquivo_url + '\')">🗑️ Excluir</button>' : '';
     return '<div class="foto-card">' +
-      '<img src="' + f.arquivo_url + '" onclick="abrirFoto(\'' + f.arquivo_url + '\')">' +
-      '<div class="info">' +
-      (f.data ? '<span class="data">' + esc(f.data) + '</span>' : '') +
-      (f.titulo ? '<h4>' + esc(f.titulo) + '</h4>' : '') +
-      '</div>' +
-      botoesExcluir(f.id, f.arquivo_url) +
+      '<img src="' + f.arquivo_url + '" alt="' + esc(f.legenda || 'Fotografia') + '" onclick="abrirFoto(\'' + f.arquivo_url + '\')">' +
+      '<div class="info"><div class="legenda">' + esc(f.legenda || 'Sem legenda') + '</div>' +
+      '<div class="data">' + esc(f.data || '') + '</div></div>' +
+      (btn ? '<div class="acoes">' + btn + '</div>' : '') +
       '</div>';
   }).join('');
 }
 
 function renderDocumentos(docs) {
   var el = document.getElementById('listaDocumentos');
-  if (!docs.length) { el.innerHTML = '<p class="vazio">Nenhum documento cadastrado ainda.</p>'; return; }
+  if (!docs.length) { el.innerHTML = '<p class="vazio">Nenhum documento adicionado ainda.</p>'; return; }
   el.innerHTML = docs.map(function (d) {
-    var isPdf = d.arquivo_url && d.arquivo_url.toLowerCase().indexOf('.pdf') > -1;
-    var link = isPdf
-      ? '<a href="' + d.arquivo_url + '" target="_blank" style="color:var(--tijolo);font-weight:600">📄 Abrir PDF</a>'
-      : '<img src="' + d.arquivo_url + '" onclick="abrirFoto(\'' + d.arquivo_url + '\')" style="cursor:zoom-in">';
-    return '<div class="card">' + link +
-      '<div class="info">' +
-      (d.data ? '<span class="data">' + esc(d.data) + '</span>' : '') +
-      '<h4>' + esc(d.titulo) + '</h4>' +
-      (d.descricao ? '<p>' + esc(d.descricao) + '</p>' : '') +
-      '</div>' +
-      botoesExcluir(d.id, d.arquivo_url) +
+    var btn = podeEditar ? '<button onclick="excluirItem(\'' + d.id + '\',\'' + (d.arquivo_url || '') + '\')">🗑️ Excluir</button>' : '';
+    return '<div class="card">' +
+      '<div class="data">' + esc(d.data || '') + '</div>' +
+      '<div class="titulo">📄 ' + esc(d.titulo) + '</div>' +
+      '<div class="descricao">' + esc(d.descricao || '') + '</div>' +
+      '<div class="acoes"><span style="cursor:pointer;color:var(--tijolo);font-weight:600" onclick="abrirFoto(\'' + d.arquivo_url + '\')">📄 Ver documento</span>' +
+      (btn ? btn : '') + '</div>' +
       '</div>';
   }).join('');
 }
 
 function renderDepoimentos(deps) {
   var el = document.getElementById('listaDepoimentos');
-  if (!deps.length) { el.innerHTML = '<p class="vazio">Nenhum depoimento cadastrado ainda.</p>'; return; }
+  if (!deps.length) { el.innerHTML = '<p class="vazio">Nenhum depoimento adicionado ainda.</p>'; return; }
   el.innerHTML = deps.map(function (d) {
     var midia = '';
-    if (d.tipo_midia === 'audio' && d.arquivo_url) {
-      midia = '<audio controls style="width:100%;margin-top:8px"><source src="' + d.arquivo_url + '"></audio>';
-    } else if (d.tipo_midia === 'video' && d.link) {
-      midia = '<a href="' + d.link + '" target="_blank" style="color:var(--tijolo);font-weight:600;display:inline-block;margin-top:8px">▶️ Ver vídeo</a>';
-    }
+    if (d.link) { midia = '<a href="' + d.link + '" target="_blank" style="color:var(--tijolo);font-weight:600">▶️ Ouvir/ver mídia</a>'; }
+    if (d.arquivo_url) { midia = '<audio controls src="' + d.arquivo_url + '"></audio>'; }
+    var btn = podeEditar ? '<button onclick="excluirItem(\'' + d.id + '\',\'' + (d.arquivo_url || '') + '\')">🗑️ Excluir</button>' : '';
     return '<div class="card">' +
-      '<div class="info">' +
-      (d.data ? '<span class="data">' + esc(d.data) + '</span>' : '') +
-      '<h4>' + esc(d.titulo) + '</h4>' +
-      '<p>' + esc(d.descricao) + '</p>' +
+      '<div class="titulo">' + esc(d.nome) + '</div>' +
+      '<div class="data">' + esc(d.relacao || '') + '</div>' +
+      '<div class="descricao">' + esc(d.trecho || '') + '</div>' +
       midia +
-      '</div>' +
-      botoesExcluir(d.id, d.arquivo_url) +
+      (btn ? '<div class="acoes">' + btn + '</div>' : '') +
       '</div>';
   }).join('');
 }
 
 function renderLugares(lugares) {
   var el = document.getElementById('listaLugares');
-  if (!lugares.length) { el.innerHTML = '<p class="vazio">Nenhum lugar cadastrado ainda.</p>'; return; }
+  if (!lugares.length) { el.innerHTML = '<p class="vazio">Nenhum lugar adicionado ainda.</p>'; return; }
   el.innerHTML = lugares.map(function (l) {
+    var btn = podeEditar ? '<button onclick="excluirItem(\'' + l.id + '\',\'\')">🗑️ Excluir</button>' : '';
     return '<div class="card">' +
-      (l.arquivo_url ? '<img src="' + l.arquivo_url + '" onclick="abrirFoto(\'' + l.arquivo_url + '\')">' : '') +
-      '<div class="info">' +
-      '<h4>📍 ' + esc(l.titulo) + '</h4>' +
-      (l.descricao ? '<p>' + esc(l.descricao) + '</p>' : '') +
-      '</div>' +
-      botoesExcluir(l.id, l.arquivo_url) +
+      '<div class="titulo">📍 ' + esc(l.titulo) + '</div>' +
+      '<div class="descricao">' + esc(l.descricao || '') + '</div>' +
+      (btn ? '<div class="acoes">' + btn + '</div>' : '') +
       '</div>';
   }).join('');
 }
